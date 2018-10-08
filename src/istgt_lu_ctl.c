@@ -643,7 +643,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 {
 	ISTGT_Ptr istgt = uctl->istgt;
 	ISTGT_LU_Ptr lu = NULL;
-	ISTGT_LU_DISK *spec = NULL, *spec1 = NULL;;
+	ISTGT_LU_DISK *spec = NULL, *spec1 = NULL;
 	const char *delim = ARGS_DELIM;
 	char *arg;
 	char *iqn;
@@ -896,7 +896,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			if (!spec)
 				goto spec_error;
 			tot = 0;
-			for (j=0;j<setval;j+=2) {
+			for (j=0; j<setval; j+=2) {
 				val1 = atoi(strsepq(&arg, delim));
 				val2 = atoi(strsepq(&arg, delim));
 				tot += val1;
@@ -914,7 +914,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 
 			for (i = 2; i <= istgt->nlogical_unit; i++) {
 				spec1 = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
-				for (j=0;j<setval;j+=2) {
+				for (j=0; j<setval; j+=2) {
 					spec1->percent_val[j>>1] = spec->percent_val[j>>1];
 					spec1->percent_latency[j>>1] = spec->percent_latency[j>>1];
 				}
@@ -923,7 +923,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			break;
 		}
 		tot = 0;
-		for (j=0;j<setval;j+=2) {
+		for (j=0; j<setval; j+=2) {
 			val1 = atoi(strsepq(&arg, delim));
 			val2 = atoi(strsepq(&arg, delim));
 			tot += val1;
@@ -2319,7 +2319,7 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 
 		spec = (ISTGT_LU_DISK *)lu->lun[0].spec;
 		if (setzero == 1) {
-			for (ind=0; ind<10;ind++) {
+			for (ind=0; ind<10; ind++) {
 				spec->IO_size[ind].write.total_time.tv_sec = 0;
 				spec->IO_size[ind].write.total_time.tv_nsec = 0;
 				spec->IO_size[ind].read.total_time.tv_sec = 0;
@@ -2343,7 +2343,7 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 		if (rc != UCTL_CMD_OK) {
 			return (rc);
 		}
-		for (ind=0; ind<10;ind++) {
+		for (ind=0; ind<10; ind++) {
 			if (spec->IO_size[ind].write.total_time.tv_sec != 0 || spec->IO_size[ind].write.total_time.tv_nsec != 0) {
 				istgt_uctl_snprintf(uctl, "%s WR       |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].write.lba, spec->IO_size[ind].write.lblen,
 					spec->IO_size[ind].write.total_time.tv_sec, spec->IO_size[ind].write.total_time.tv_nsec,
@@ -2370,7 +2370,7 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 				}
 			}
 		}
-		for (ind=0; ind<10;ind++) {
+		for (ind=0; ind<10; ind++) {
 			if (spec->IO_size[ind].read.total_time.tv_sec != 0 || spec->IO_size[ind].read.total_time.tv_nsec != 0) {
 				istgt_uctl_snprintf(uctl, "%s RD       |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].read.lba, spec->IO_size[ind].read.lblen,
 					spec->IO_size[ind].read.total_time.tv_sec, spec->IO_size[ind].read.total_time.tv_nsec,
@@ -2397,7 +2397,7 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 				}
 			}
 		}
-		for (ind=0; ind<10;ind++) {
+		for (ind=0; ind<10; ind++) {
 			if (spec->IO_size[ind].cmp_n_write.total_time.tv_sec != 0 || spec->IO_size[ind].cmp_n_write.total_time.tv_nsec != 0) {
 				istgt_uctl_snprintf(uctl, "%s CMP_n_WR |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].cmp_n_write.lba, spec->IO_size[ind].cmp_n_write.lblen,
 					spec->IO_size[ind].cmp_n_write.total_time.tv_sec, spec->IO_size[ind].cmp_n_write.total_time.tv_nsec,
@@ -2424,7 +2424,7 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 				}
 			}
 		}
-		for (ind=0; ind<10;ind++) {
+		for (ind=0; ind<10; ind++) {
 			if (spec->IO_size[ind].unmp.total_time.tv_sec != 0 || spec->IO_size[ind].unmp.total_time.tv_nsec != 0) {
 				istgt_uctl_snprintf(uctl, "%s UNMP     |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].unmp.lba, spec->IO_size[ind].unmp.lblen,
 					spec->IO_size[ind].unmp.total_time.tv_sec, spec->IO_size[ind].unmp.total_time.tv_nsec,
@@ -2451,7 +2451,7 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 				}
 			}
 		}
-		for (ind=0; ind<10;ind++) {
+		for (ind=0; ind<10; ind++) {
 			if (spec->IO_size[ind].write_same.total_time.tv_sec != 0 || spec->IO_size[ind].write_same.total_time.tv_nsec != 0) {
 				istgt_uctl_snprintf(uctl, "%s WR_SAME  |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].write_same.lba, spec->IO_size[ind].write_same.lblen,
 					spec->IO_size[ind].write_same.total_time.tv_sec, spec->IO_size[ind].write_same.total_time.tv_nsec,
@@ -2586,7 +2586,7 @@ istgt_uctl_cmd_dump(UCTL_Ptr uctl)
 					(spec->xcopy == 1) ? "Enabled":"Disabled",
 					temp, lu->conns);
 		else
-			istgt_uctl_snprintf(uctl, "%s LUN LU%d %s %s CONNECTIONS:%d\n",uctl->cmd, lu->num, lu->name, temp, lu->conns);
+			istgt_uctl_snprintf(uctl, "%s LUN LU%d %s %s CONNECTIONS:%d\n", uctl->cmd, lu->num, lu->name, temp, lu->conns);
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
 			MTX_UNLOCK(&lu->mutex);
@@ -2798,7 +2798,7 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 		clock_gettime(clockid, &now);
 		if (spec->do_avg == 0)
 		{
-			for (j=0;j<32;j++)
+			for (j=0; j<32; j++)
 			{
 				spec->avgs[j].count = 0;
 				spec->avgs[j].tot_sec = 0;
@@ -2822,7 +2822,7 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 				spec->avgs[0].tot_nsec = now.tv_nsec - spec->avgs[0].tot_nsec;
 			}
 
-			for (j=0;j<levels;j++)
+			for (j=0; j<levels; j++)
 			{
 				wn = snprintf(bptr, brem, " %d:%d %ld.%9.9ld",
 					j, spec->avgs[j].count, spec->avgs[j].tot_sec,
@@ -2952,13 +2952,13 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 extern _verb_istat ISCSIstat_rest[ISCSI_ARYSZ];
 extern _verb_stat SCSIstat_rest[SCSI_ARYSZ];
 
-_verb_stat SCSIstat_last[SCSI_ARYSZ] = { {0,0,0} };
-_verb_stat SCSIstat_now[SCSI_ARYSZ] = { {0,0,0} };
-_verb_stat SCSIstat_rslt[SCSI_ARYSZ] = { {0,0,0} };
+_verb_stat SCSIstat_last[SCSI_ARYSZ] = { {0, 0, 0} };
+_verb_stat SCSIstat_now[SCSI_ARYSZ] = { {0, 0, 0} };
+_verb_stat SCSIstat_rslt[SCSI_ARYSZ] = { {0, 0, 0} };
 
-_verb_istat ISCSIstat_last[ISCSI_ARYSZ] = { {0,0,0} };
-_verb_istat ISCSIstat_now[ISCSI_ARYSZ] = { {0,0,0} };
-_verb_istat ISCSIstat_rslt[ISCSI_ARYSZ] = { {0,0,0} };
+_verb_istat ISCSIstat_last[ISCSI_ARYSZ] = { {0, 0, 0} };
+_verb_istat ISCSIstat_now[ISCSI_ARYSZ] = { {0, 0, 0} };
+_verb_istat ISCSIstat_rslt[ISCSI_ARYSZ] = { {0, 0, 0} };
 
 #ifdef REPLICATION
 /* istgt_uctl_cmd_iostats collects the iostats from the spec structure
