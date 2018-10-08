@@ -244,7 +244,7 @@ istgt_uctl_cmd_auth(UCTL_Ptr uctl)
 		}
 
 		chap_a = strsepq(&arg, delim);
-		if (chap_a == NULL  || strcasecmp(chap_a, "5") != 0) {
+		if (chap_a == NULL || strcasecmp(chap_a, "5") != 0) {
 			istgt_uctl_snprintf(uctl, "ERR invalid algorithm\n");
 			goto error_return;
 		}
@@ -3522,7 +3522,7 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 		goto error_return;
 	}
 
-	if (istgt->nuctl_netmasks != 0  &&  (uctl->family != AF_UNIX)) {
+	if (istgt->nuctl_netmasks != 0 && (uctl->family != AF_UNIX)) {
 		rc = -1;
 		for (i = 0; i < istgt->nuctl_netmasks; i++) {
 			rc = istgt_lu_allow_netmask(istgt->uctl_netmasks[i], uctl->caddr);
