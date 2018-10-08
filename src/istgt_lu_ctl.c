@@ -450,77 +450,77 @@ istgt_uctl_cmd_version(UCTL_Ptr uctl)
 static int
 istgt_uctl_cmd_sync(UCTL_Ptr uctl)
 {
-        ISTGT_LU_Ptr lu;
-        ISTGT_LU_LUN_Ptr llp;
-        const char *delim = ARGS_DELIM;
-        char *arg;
-        char *iqn;
-        char *lun;
-        int lun_i;
-        int rc;
-        arg = uctl->arg;
-        iqn = strsepq(&arg, delim);
-        lun = strsepq(&arg, delim);
+	ISTGT_LU_Ptr lu;
+	ISTGT_LU_LUN_Ptr llp;
+	const char *delim = ARGS_DELIM;
+	char *arg;
+	char *iqn;
+	char *lun;
+	int lun_i;
+	int rc;
+	arg = uctl->arg;
+	iqn = strsepq(&arg, delim);
+	lun = strsepq(&arg, delim);
 
-        if (iqn == NULL || arg != NULL) {
-                istgt_uctl_snprintf(uctl, "ERR invalid parameters\n");
-                rc = istgt_uctl_writeline(uctl);
-                if (rc != UCTL_CMD_OK) {
-                        return (rc);
-                }
-                return (UCTL_CMD_ERR);
-        }
-        if (lun == NULL) {
-                lun_i = 0;
-        }
-        else {
-                lun_i = (int) strtol(lun, NULL, 10);
-        }
+	if (iqn == NULL || arg != NULL) {
+		istgt_uctl_snprintf(uctl, "ERR invalid parameters\n");
+		rc = istgt_uctl_writeline(uctl);
+		if (rc != UCTL_CMD_OK) {
+			return (rc);
+		}
+		return (UCTL_CMD_ERR);
+	}
+	if (lun == NULL) {
+		lun_i = 0;
+	}
+	else {
+		lun_i = (int) strtol(lun, NULL, 10);
+	}
 
-        lu = istgt_lu_find_target(uctl->istgt, iqn);
-        if (lu == NULL) {
-                istgt_uctl_snprintf(uctl, "ERR no target\n");
-                goto error_return;
-        }
-        if (lun_i < 0 || lun_i >= lu->maxlun) {
-                istgt_uctl_snprintf(uctl, "ERR no target\n");
-                goto error_return;
-        }
+	lu = istgt_lu_find_target(uctl->istgt, iqn);
+	if (lu == NULL) {
+		istgt_uctl_snprintf(uctl, "ERR no target\n");
+		goto error_return;
+	}
+	if (lun_i < 0 || lun_i >= lu->maxlun) {
+		istgt_uctl_snprintf(uctl, "ERR no target\n");
+		goto error_return;
+	}
 
-        llp = &lu->lun[lun_i];
-        if (llp->type == ISTGT_LU_LUN_TYPE_NONE) {
-                istgt_uctl_snprintf(uctl, "ERR no LUN\n");
-                goto error_return;
-        }
-        if (lu->type == ISTGT_LU_TYPE_DISK) {
-                MTX_LOCK(&lu->mutex);
-                rc = istgt_lu_disk_sync_reservation(lu, lun_i);
-                MTX_UNLOCK(&lu->mutex);
-                if(rc < 0)
-                        istgt_uctl_snprintf(uctl, "ERR in sync cmd execution\n");
-        }
-        else {
-                istgt_uctl_snprintf(uctl, "ERR sync_rsv \n");
-                rc = -1;
-        }
+	llp = &lu->lun[lun_i];
+	if (llp->type == ISTGT_LU_LUN_TYPE_NONE) {
+		istgt_uctl_snprintf(uctl, "ERR no LUN\n");
+		goto error_return;
+	}
+	if (lu->type == ISTGT_LU_TYPE_DISK) {
+		MTX_LOCK(&lu->mutex);
+		rc = istgt_lu_disk_sync_reservation(lu, lun_i);
+		MTX_UNLOCK(&lu->mutex);
+		if(rc < 0)
+			istgt_uctl_snprintf(uctl, "ERR in sync cmd execution\n");
+	}
+	else {
+		istgt_uctl_snprintf(uctl, "ERR sync_rsv \n");
+		rc = -1;
+	}
 
-        if (rc < 0) {
-                error_return:
-                        rc = istgt_uctl_writeline(uctl);
-                        if (rc != UCTL_CMD_OK) {
-                                return (rc);
-                        }
-                        return (UCTL_CMD_ERR);
-        }
-        /* logging event */
-        ISTGT_NOTICELOG("Unit Rsv_Persist %s lun%d\n", iqn, lun_i);
-        /* Persist succeeded */
-        istgt_uctl_snprintf(uctl, "OK %s\n", uctl->cmd);
-        rc = istgt_uctl_writeline(uctl);
-        if (rc != UCTL_CMD_OK) {
-                return (rc);
-        }
-        return (UCTL_CMD_OK);
+	if (rc < 0) {
+		error_return:
+			rc = istgt_uctl_writeline(uctl);
+			if (rc != UCTL_CMD_OK) {
+				return (rc);
+			}
+			return (UCTL_CMD_ERR);
+	}
+	/* logging event */
+	ISTGT_NOTICELOG("Unit Rsv_Persist %s lun%d\n", iqn, lun_i);
+	/* Persist succeeded */
+	istgt_uctl_snprintf(uctl, "OK %s\n", uctl->cmd);
+	rc = istgt_uctl_writeline(uctl);
+	if (rc != UCTL_CMD_OK) {
+		return (rc);
+	}
+	return (UCTL_CMD_OK);
 }
 
 #ifdef	REPLICATION
@@ -968,84 +968,84 @@ error_return:
 static int
 istgt_uctl_cmd_persist(UCTL_Ptr uctl)
 {
-        ISTGT_LU_Ptr lu;
-        ISTGT_LU_LUN_Ptr llp;
-        const char *delim = ARGS_DELIM;
-        char *arg;
-        char *iqn;
-        char *lun;
-        char *persistopt;
-        int lun_i;
-        int rc;
-        arg = uctl->arg;
-        iqn = strsepq(&arg, delim);
-        lun = strsepq(&arg, delim);
-        persistopt = strsepq(&arg, delim);
+	ISTGT_LU_Ptr lu;
+	ISTGT_LU_LUN_Ptr llp;
+	const char *delim = ARGS_DELIM;
+	char *arg;
+	char *iqn;
+	char *lun;
+	char *persistopt;
+	int lun_i;
+	int rc;
+	arg = uctl->arg;
+	iqn = strsepq(&arg, delim);
+	lun = strsepq(&arg, delim);
+	persistopt = strsepq(&arg, delim);
 
-        if (iqn == NULL || arg != NULL) {
-                istgt_uctl_snprintf(uctl, "ERR invalid parameters\n");
-                rc = istgt_uctl_writeline(uctl);
-                if (rc != UCTL_CMD_OK) {
-                        return (rc);
-                }
-                return (UCTL_CMD_ERR);
-        }
-        if (lun == NULL) {
-                lun_i = 0;
-        }
-        else {
-                lun_i = (int) strtol(lun, NULL, 10);
-        }
+	if (iqn == NULL || arg != NULL) {
+		istgt_uctl_snprintf(uctl, "ERR invalid parameters\n");
+		rc = istgt_uctl_writeline(uctl);
+		if (rc != UCTL_CMD_OK) {
+			return (rc);
+		}
+		return (UCTL_CMD_ERR);
+	}
+	if (lun == NULL) {
+		lun_i = 0;
+	}
+	else {
+		lun_i = (int) strtol(lun, NULL, 10);
+	}
 
-        if(persistopt == NULL) {
-                istgt_uctl_snprintf(uctl, "ERR no persistopt\n");
-                goto error_return;
-        }
+	if(persistopt == NULL) {
+		istgt_uctl_snprintf(uctl, "ERR no persistopt\n");
+		goto error_return;
+	}
 
-        lu = istgt_lu_find_target(uctl->istgt, iqn);
-        if (lu == NULL) {
-                istgt_uctl_snprintf(uctl, "ERR no target\n");
-                goto error_return;
-        }
-        if (lun_i < 0 || lun_i >= lu->maxlun) {
-                istgt_uctl_snprintf(uctl, "ERR no target\n");
-                goto error_return;
-        }
+	lu = istgt_lu_find_target(uctl->istgt, iqn);
+	if (lu == NULL) {
+		istgt_uctl_snprintf(uctl, "ERR no target\n");
+		goto error_return;
+	}
+	if (lun_i < 0 || lun_i >= lu->maxlun) {
+		istgt_uctl_snprintf(uctl, "ERR no target\n");
+		goto error_return;
+	}
 
-        llp = &lu->lun[lun_i];
-        if (llp->type == ISTGT_LU_LUN_TYPE_NONE) {
-                istgt_uctl_snprintf(uctl, "ERR no LUN\n");
-                goto error_return;
-        }
-        if (lu->type == ISTGT_LU_TYPE_DISK) {
-                MTX_LOCK(&lu->mutex);
-                rc = istgt_lu_disk_persist_reservation(lu, lun_i, persistopt);
-                MTX_UNLOCK(&lu->mutex);
-                if(rc < 0)
-                        istgt_uctl_snprintf(uctl, "ERR in persist cmd execution\n");
-        }
-        else {
-                istgt_uctl_snprintf(uctl, "ERR clear_rsv \n");
-                rc = -1;
-        }
+	llp = &lu->lun[lun_i];
+	if (llp->type == ISTGT_LU_LUN_TYPE_NONE) {
+		istgt_uctl_snprintf(uctl, "ERR no LUN\n");
+		goto error_return;
+	}
+	if (lu->type == ISTGT_LU_TYPE_DISK) {
+		MTX_LOCK(&lu->mutex);
+		rc = istgt_lu_disk_persist_reservation(lu, lun_i, persistopt);
+		MTX_UNLOCK(&lu->mutex);
+		if(rc < 0)
+			istgt_uctl_snprintf(uctl, "ERR in persist cmd execution\n");
+	}
+	else {
+		istgt_uctl_snprintf(uctl, "ERR clear_rsv \n");
+		rc = -1;
+	}
 
-        if (rc < 0) {
-                error_return:
-                        rc = istgt_uctl_writeline(uctl);
-                        if (rc != UCTL_CMD_OK) {
-                                return (rc);
-                        }
-                        return (UCTL_CMD_ERR);
-        }
-        /* logging event */
-        ISTGT_NOTICELOG("Unit Rsv_Persist %s lun%d from %s\n", iqn, lun_i, uctl->caddr);
-        /* Persist succeeded */
-        istgt_uctl_snprintf(uctl, "OK %s\n", uctl->cmd);
-        rc = istgt_uctl_writeline(uctl);
-        if (rc != UCTL_CMD_OK) {
-                return (rc);
-        }
-        return (UCTL_CMD_OK);
+	if (rc < 0) {
+		error_return:
+			rc = istgt_uctl_writeline(uctl);
+			if (rc != UCTL_CMD_OK) {
+				return (rc);
+			}
+			return (UCTL_CMD_ERR);
+	}
+	/* logging event */
+	ISTGT_NOTICELOG("Unit Rsv_Persist %s lun%d from %s\n", iqn, lun_i, uctl->caddr);
+	/* Persist succeeded */
+	istgt_uctl_snprintf(uctl, "OK %s\n", uctl->cmd);
+	rc = istgt_uctl_writeline(uctl);
+	if (rc != UCTL_CMD_OK) {
+		return (rc);
+	}
+	return (UCTL_CMD_OK);
 }
 
 
@@ -2050,17 +2050,17 @@ istgt_uctl_cmd_log(UCTL_Ptr uctl)
 	tracestr = strsepq(&arg, delim);
 	delaystr= strsepq(&arg, delim);
 
-    if (gottracestr == NULL)
+	if (gottracestr == NULL)
 		changetrace = 0;
 	else
 		changetrace = (int) strtol(gottracestr, NULL, 10);
 
-    if (tracestr == NULL)
+	if (tracestr == NULL)
 		newtrace = 0;
 	else
 		newtrace = (int) strtol(tracestr, NULL, 10);
 
-    if (delaystr == NULL)
+	if (delaystr == NULL)
 		newdelay = 0;
 	else
 		newdelay = (int) strtol(delaystr, NULL, 10);
@@ -2819,13 +2819,13 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 			spec->do_avg = 0;
 			wn = snprintf(bptr, brem, " Avgs:");
 			adjbuf()
-		        if (((signed long)((signed long)(now.tv_nsec) - (signed long)(spec->avgs[0].tot_nsec))) < 0) {
-                		spec->avgs[0].tot_sec  = now.tv_sec - spec->avgs[0].tot_sec - 1;
-                		spec->avgs[0].tot_nsec = 1000000000 + now.tv_nsec - spec->avgs[0].tot_nsec;
-        		} else {
-                		spec->avgs[0].tot_sec  = now.tv_sec - spec->avgs[0].tot_sec;
-                		spec->avgs[0].tot_nsec = now.tv_nsec - spec->avgs[0].tot_nsec;
-        		}
+			if (((signed long)((signed long)(now.tv_nsec) - (signed long)(spec->avgs[0].tot_nsec))) < 0) {
+				spec->avgs[0].tot_sec  = now.tv_sec - spec->avgs[0].tot_sec - 1;
+				spec->avgs[0].tot_nsec = 1000000000 + now.tv_nsec - spec->avgs[0].tot_nsec;
+			} else {
+				spec->avgs[0].tot_sec  = now.tv_sec - spec->avgs[0].tot_sec;
+				spec->avgs[0].tot_nsec = now.tv_nsec - spec->avgs[0].tot_nsec;
+			}
 
 			for(j=0;j<levels;j++)
 			{
@@ -3070,7 +3070,7 @@ istgt_uctl_cmd_iostats(UCTL_Ptr uctl)
 	if (rc != UCTL_CMD_OK) {
 		return (rc);
 	}
-   return (UCTL_CMD_OK);
+	return (UCTL_CMD_OK);
 }
 #endif
 
@@ -3268,8 +3268,8 @@ static ISTGT_UCTL_CMD_TABLE istgt_uctl_cmd_table[] =
 	{ "UNLOAD",  istgt_uctl_cmd_unload },
 	{ "LOAD",    istgt_uctl_cmd_load },
 	{ "CHANGE",  istgt_uctl_cmd_change },
-        { "SYNC", istgt_uctl_cmd_sync },
-        {"PERSIST", istgt_uctl_cmd_persist },
+	{ "SYNC", istgt_uctl_cmd_sync },
+	{"PERSIST", istgt_uctl_cmd_persist },
 	{ "RESET",   istgt_uctl_cmd_reset },
 	{ "CLEAR",   istgt_uctl_cmd_clear },
 	{ "REFRESH", istgt_uctl_cmd_refresh },
