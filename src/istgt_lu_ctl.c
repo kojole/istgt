@@ -588,7 +588,7 @@ istgt_uctl_cmd_mempoolstats(UCTL_Ptr uctl)
 	istgt_lu_mempool_stats(&response);
 	istgt_uctl_snprintf(uctl, "%s  %s\n", uctl->cmd, response);
 	rc = istgt_uctl_writeline(uctl);
-	if (rc != UCTL_CMD_OK){
+	if (rc != UCTL_CMD_OK) {
 		if (response)
 			free(response);
 		return (rc);
@@ -622,7 +622,7 @@ istgt_uctl_cmd_replica_stats(UCTL_Ptr uctl)
 	istgt_lu_replica_stats(volname, &response);
 	istgt_uctl_snprintf(uctl, "%s  %s\n", uctl->cmd, response);
 	rc = istgt_uctl_writeline(uctl);
-	if (rc != UCTL_CMD_OK){
+	if (rc != UCTL_CMD_OK) {
 		if (response)
 			free(response);
 		return (rc);
@@ -2376,7 +2376,7 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 			}
 		}
 		for(ind=0; ind<10;ind++) {
-			if(spec->IO_size[ind].read.total_time.tv_sec != 0 || spec->IO_size[ind].read.total_time.tv_nsec != 0){
+			if(spec->IO_size[ind].read.total_time.tv_sec != 0 || spec->IO_size[ind].read.total_time.tv_nsec != 0) {
 				istgt_uctl_snprintf(uctl, "%s RD       |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].read.lba, spec->IO_size[ind].read.lblen,
 					spec->IO_size[ind].read.total_time.tv_sec, spec->IO_size[ind].read.total_time.tv_nsec,
 					spec->IO_size[ind].read.caller[1] ? spec->IO_size[ind].read.caller[1] : '9',
@@ -2403,7 +2403,7 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 			}
 		}
 		for(ind=0; ind<10;ind++) {
-			if(spec->IO_size[ind].cmp_n_write.total_time.tv_sec != 0 || spec->IO_size[ind].cmp_n_write.total_time.tv_nsec != 0){
+			if(spec->IO_size[ind].cmp_n_write.total_time.tv_sec != 0 || spec->IO_size[ind].cmp_n_write.total_time.tv_nsec != 0) {
 				istgt_uctl_snprintf(uctl, "%s CMP_n_WR |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].cmp_n_write.lba, spec->IO_size[ind].cmp_n_write.lblen,
 					spec->IO_size[ind].cmp_n_write.total_time.tv_sec, spec->IO_size[ind].cmp_n_write.total_time.tv_nsec,
 					spec->IO_size[ind].cmp_n_write.caller[1] ? spec->IO_size[ind].cmp_n_write.caller[1] : '9',
@@ -2430,7 +2430,7 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 			}
 		}
 		for(ind=0; ind<10;ind++) {
-			if(spec->IO_size[ind].unmp.total_time.tv_sec != 0 || spec->IO_size[ind].unmp.total_time.tv_nsec != 0){
+			if(spec->IO_size[ind].unmp.total_time.tv_sec != 0 || spec->IO_size[ind].unmp.total_time.tv_nsec != 0) {
 				istgt_uctl_snprintf(uctl, "%s UNMP     |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].unmp.lba, spec->IO_size[ind].unmp.lblen,
 					spec->IO_size[ind].unmp.total_time.tv_sec, spec->IO_size[ind].unmp.total_time.tv_nsec,
 					spec->IO_size[ind].unmp.caller[1] ? spec->IO_size[ind].unmp.caller[1] : '9',
@@ -2457,7 +2457,7 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 			}
 		}
 		for(ind=0; ind<10;ind++) {
-			if(spec->IO_size[ind].write_same.total_time.tv_sec != 0 || spec->IO_size[ind].write_same.total_time.tv_nsec != 0){
+			if(spec->IO_size[ind].write_same.total_time.tv_sec != 0 || spec->IO_size[ind].write_same.total_time.tv_nsec != 0) {
 				istgt_uctl_snprintf(uctl, "%s WR_SAME  |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].write_same.lba, spec->IO_size[ind].write_same.lblen,
 					spec->IO_size[ind].write_same.total_time.tv_sec, spec->IO_size[ind].write_same.total_time.tv_nsec,
 					spec->IO_size[ind].write_same.caller[1] ? spec->IO_size[ind].write_same.caller[1] : '9',
@@ -3039,7 +3039,7 @@ istgt_uctl_cmd_iostats(UCTL_Ptr uctl)
 
 		istgt_uctl_snprintf(uctl, "%s  %s\n", uctl->cmd, json_object_to_json_string(jobj));
 		rc = istgt_uctl_writeline(uctl);
-		if (rc != UCTL_CMD_OK){
+		if (rc != UCTL_CMD_OK) {
 			// free the pointers
 			free(reads);
 			free(writes);
