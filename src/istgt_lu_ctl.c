@@ -60,12 +60,12 @@
 
 #if !defined(__GNUC__)
 #undef __attribute__
-#define __attribute__(x)
+#define	__attribute__(x)
 #endif
 
-#define TIMEOUT_RW 60
-#define MAX_LINEBUF 4096
-//#define MAX_LINEBUF 8192
+#define	TIMEOUT_RW 60
+#define	MAX_LINEBUF 4096
+// #define	MAX_LINEBUF 8192
 
 #ifdef	REPLICATION
 extern int replication_initialized;
@@ -119,7 +119,7 @@ typedef enum {
 	UCTL_CMD_DISCON = 4,
 } UCTL_CMD_STATUS;
 
-#define ARGS_DELIM " \t"
+#define	ARGS_DELIM " \t"
 
 static int
 istgt_uctl_readline(UCTL_Ptr uctl)
@@ -524,7 +524,7 @@ istgt_uctl_cmd_sync(UCTL_Ptr uctl)
 }
 
 #ifdef	REPLICATION
-#define CHECK_ARG_AND_GOTO_ERROR { \
+#define	CHECK_ARG_AND_GOTO_ERROR { \
 	if (arg == NULL) { \
 		istgt_uctl_snprintf(uctl, "ERR invalid param\n"); \
 		goto error_return; \
@@ -2718,7 +2718,7 @@ extern clockid_t clockid;
 static int
 istgt_uctl_cmd_que(UCTL_Ptr uctl)
 {
-#define adjbuf() {    \
+#define	adjbuf() {    \
 	if (wn < 0)    \
 		wn = 0;    \
 	else if (wn > brem) \
@@ -2726,7 +2726,7 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 	bptr += wn;    \
 	brem -= wn;    \
 }
-#define tdiff(_s, _n, _r) {                     \
+#define	tdiff(_s, _n, _r) {                     \
 	if ((_n.tv_nsec - _s.tv_nsec) < 0) {        \
 		_r.tv_sec  = _n.tv_sec - _s.tv_sec-1;   \
 		_r.tv_nsec = 1000000000 + _n.tv_nsec - _s.tv_nsec; \
@@ -2735,7 +2735,7 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 		_r.tv_nsec = _n.tv_nsec - _s.tv_nsec;   \
 	}                                           \
 }
-#define _BSZ_ 4086
+#define	_BSZ_ 4086
 	char buf[_BSZ_+10];
 	int  brem = _BSZ_, wn = 0;
 	int  toprint, chunk, j;
