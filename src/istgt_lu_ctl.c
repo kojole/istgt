@@ -705,7 +705,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
-		ISTGT_LOG("wait_inflights %d->%d\n" , wait_inflights, setval);
+		ISTGT_LOG("wait_inflights %d->%d\n", wait_inflights, setval);
 		wait_inflights = setval;
 		break;
 	case 4:
@@ -733,7 +733,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
-		ISTGT_LOG("clear_resv %d->%d\n" , clear_resv, setval);
+		ISTGT_LOG("clear_resv %d->%d\n", clear_resv, setval);
 		clear_resv = setval;
 		break;
 	case 6:
@@ -825,7 +825,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
-		ISTGT_LOG("abort_release %d->%d\n" , abort_release, setval);
+		ISTGT_LOG("abort_release %d->%d\n", abort_release, setval);
 		abort_release = setval;
 		break;
 	case 12:
@@ -2510,7 +2510,7 @@ istgt_uctl_cmd_dump(UCTL_Ptr uctl)
 	char *c_size = size;
 	char *bp = temp;
 	int count = 0;
-	int rem = 2048 , ln = 0;
+	int rem = 2048, ln = 0;
 	uint64_t temp_s = 0, temp_s2 = 0;
 
 	arg = uctl->arg;
@@ -3006,7 +3006,7 @@ istgt_uctl_cmd_iostats(UCTL_Ptr uctl)
 		length = snprintf(NULL, 0, "%"PRIu64, spec->size);
 		size = malloc(length + 1);
 		snprintf(size, length + 1, "%"PRIu64, spec->size);
-		usedlogicalblocks = ( spec->stats.used / spec->blocklen ) ;
+		usedlogicalblocks = ( spec->stats.used / spec->blocklen );
 
 		length = snprintf(NULL, 0, "%"PRIu64, usedlogicalblocks);
 		usedblocks = malloc(length + 1);
