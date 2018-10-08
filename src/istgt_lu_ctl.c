@@ -3709,4 +3709,3 @@ istgt_uctl_shutdown(ISTGT_Ptr istgt)
 	xfree(istgt->uctl_netmasks);
 	return (0);
 }
-
