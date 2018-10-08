@@ -3260,7 +3260,7 @@ static ISTGT_UCTL_CMD_TABLE istgt_uctl_cmd_table[] =
 	{ "LOAD",    istgt_uctl_cmd_load },
 	{ "CHANGE",  istgt_uctl_cmd_change },
 	{ "SYNC", istgt_uctl_cmd_sync },
-	{"PERSIST", istgt_uctl_cmd_persist },
+	{ "PERSIST", istgt_uctl_cmd_persist },
 	{ "RESET",   istgt_uctl_cmd_reset },
 	{ "CLEAR",   istgt_uctl_cmd_clear },
 	{ "REFRESH", istgt_uctl_cmd_refresh },
@@ -3268,8 +3268,8 @@ static ISTGT_UCTL_CMD_TABLE istgt_uctl_cmd_table[] =
 	{ "STOP",    istgt_uctl_cmd_stop },
 	{ "MODIFY", istgt_uctl_cmd_modify },
 	{ "STATUS", istgt_uctl_cmd_status },
-	{ "INFO",     istgt_uctl_cmd_info },
-	{ "DUMP",     istgt_uctl_cmd_dump },
+	{ "INFO", istgt_uctl_cmd_info },
+	{ "DUMP", istgt_uctl_cmd_dump },
 	{ "MEM", istgt_uctl_cmd_mem},
 	{ "MEMDEBUG", istgt_uctl_cmd_memdebug},
 	{ "LOG", istgt_uctl_cmd_log},
@@ -3287,7 +3287,7 @@ static ISTGT_UCTL_CMD_TABLE istgt_uctl_cmd_table[] =
 	{ "SNAPDESTROY", istgt_uctl_cmd_snap},
 	{ "REPLICA", istgt_uctl_cmd_replica_stats},
 #endif
-	{ NULL,      NULL },
+	{ NULL, NULL },
 };
 
 static int
