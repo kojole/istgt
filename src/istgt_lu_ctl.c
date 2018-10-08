@@ -288,7 +288,7 @@ istgt_uctl_cmd_auth(UCTL_Ptr uctl)
 			istgt_uctl_snprintf(uctl, "ERR no response\n");
 			goto error_return;
 		}
-		//ISTGT_TRACELOG(ISTGT_TRACE_DEBUG, "N=%s, R=%s\n", chap_n, chap_r);
+		// ISTGT_TRACELOG(ISTGT_TRACE_DEBUG, "N=%s, R=%s\n", chap_n, chap_r);
 
 		rc = istgt_hex2bin(resmd5, ISTGT_MD5DIGEST_LEN, chap_r);
 		if (rc < 0 || rc != ISTGT_MD5DIGEST_LEN) {
@@ -1269,7 +1269,7 @@ istgt_uctl_cmd_unload(UCTL_Ptr uctl)
 		break;
 	default:
 		rc = -1;
-	}*/
+	} */
 
 	if (rc < 0) {
 		istgt_uctl_snprintf(uctl, "ERR unload\n");
@@ -1358,7 +1358,7 @@ istgt_uctl_cmd_load(UCTL_Ptr uctl)
 		break;
 	default:
 		rc = -1;
-	}*/
+	} */
 
 	if (rc < 0) {
 		istgt_uctl_snprintf(uctl, "ERR load\n");
@@ -1526,7 +1526,7 @@ istgt_uctl_cmd_change(UCTL_Ptr uctl)
 		break;
 	default:
 		rc = -1;
-	}*/
+	} */
 
 	if (rc < 0) {
 		xfree(safedir);
@@ -2069,7 +2069,7 @@ istgt_uctl_cmd_log(UCTL_Ptr uctl)
 		g_trace_flag = newtrace;
 
 	if (newdelay == -2) {
-		//leave it untouched
+		// leave it untouched
 	} else if (newdelay == -1) {
 		g_logtimes = 0;
 	} else {
@@ -2701,7 +2701,7 @@ istgt_uctl_cmd_rsv(UCTL_Ptr uctl)
 			continue;
 		if (iqn != NULL && strcasecmp(iqn, lu->name) != 0)
 			continue;
-		(void)istgt_lu_disk_print_reservation(lu, 0); //CB has only lun 0
+		(void)istgt_lu_disk_print_reservation(lu, 0); // CB has only lun 0
 	}
 	MTX_UNLOCK(&uctl->istgt->mutex);
 
@@ -2882,7 +2882,7 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 			}
 			MTX_UNLOCK(&spec->luworker_mutex[i]);
 		}
-		//MTX_UNLOCK(&spec->cmd_queue_mutex);
+		// MTX_UNLOCK(&spec->cmd_queue_mutex);
 		*bptr++ = ' '; *bptr++ = '-'; *bptr++ = ' '; brem-=3;
 		/* luworker waiting data from network */
 		MTX_LOCK(&spec->wait_lu_task_mutex);
