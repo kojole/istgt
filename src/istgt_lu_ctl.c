@@ -472,8 +472,7 @@ istgt_uctl_cmd_sync(UCTL_Ptr uctl)
 	}
 	if (lun == NULL) {
 		lun_i = 0;
-	}
-	else {
+	} else {
 		lun_i = (int) strtol(lun, NULL, 10);
 	}
 
@@ -498,8 +497,7 @@ istgt_uctl_cmd_sync(UCTL_Ptr uctl)
 		MTX_UNLOCK(&lu->mutex);
 		if (rc < 0)
 			istgt_uctl_snprintf(uctl, "ERR in sync cmd execution\n");
-	}
-	else {
+	} else {
 		istgt_uctl_snprintf(uctl, "ERR sync_rsv \n");
 		rc = -1;
 	}
@@ -992,8 +990,7 @@ istgt_uctl_cmd_persist(UCTL_Ptr uctl)
 	}
 	if (lun == NULL) {
 		lun_i = 0;
-	}
-	else {
+	} else {
 		lun_i = (int) strtol(lun, NULL, 10);
 	}
 
@@ -1023,8 +1020,7 @@ istgt_uctl_cmd_persist(UCTL_Ptr uctl)
 		MTX_UNLOCK(&lu->mutex);
 		if (rc < 0)
 			istgt_uctl_snprintf(uctl, "ERR in persist cmd execution\n");
-	}
-	else {
+	} else {
 		istgt_uctl_snprintf(uctl, "ERR clear_rsv \n");
 		rc = -1;
 	}
@@ -1697,8 +1693,7 @@ istgt_uctl_cmd_clear(UCTL_Ptr uctl)
 		MTX_UNLOCK(&lu->mutex);
 		if (rc < 0)
 			istgt_uctl_snprintf(uctl, "ERR in clear cmd execution\n");
-	}
-	else {
+	} else {
 		istgt_uctl_snprintf(uctl, "ERR clear_rsv \n");
 		rc = -1;
 	}
