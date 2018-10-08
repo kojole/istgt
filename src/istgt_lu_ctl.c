@@ -861,8 +861,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		spec->inject_cnt = setval;
 		break;
 	case 14:
-		if (setval > 1)
-		{
+		if (setval > 1) {
 			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
@@ -882,8 +881,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		spec->exit_lu_worker = setval;
 		break;
 	case 15:
-		if (setval < 2 || setval%2 != 0)
-		{
+		if (setval < 2 || setval%2 != 0) {
 			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
@@ -905,8 +903,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 				ISTGT_LOG("%d %d\n", val1, val2);
 			}
 
-			if (tot != 100)
-			{
+			if (tot != 100) {
 				istgt_uctl_snprintf(uctl, "ERR in tot %d percentage\n", tot);
 				goto error_return;
 			}
@@ -932,8 +929,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			ISTGT_LOG("%d %d\n", val1, val2);
 		}
 
-		if (tot != 100)
-		{
+		if (tot != 100) {
 			istgt_uctl_snprintf(uctl, "ERR in tot %d percentage\n", tot);
 			goto error_return;
 		}
