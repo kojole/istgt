@@ -713,7 +713,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
-		if (!strcmp(iqn, "ALL")) {
+		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
 				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
@@ -741,7 +741,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
-		if (!strcmp(iqn, "ALL")) {
+		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
 				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
@@ -761,7 +761,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
-		if (!strcmp(iqn, "ALL")) {
+		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
 				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
@@ -777,7 +777,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		spec->xcopy = setval;
 		break;
 	case 8:
-		if (!strcmp(iqn, "ALL")) {
+		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
 				istgt->logical_unit[i]->limit_q_size = setval;
 			}
@@ -789,7 +789,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		}
 		break;
 	case 9:
-		if (!strcmp(iqn, "ALL")) {
+		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
 				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
@@ -805,7 +805,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		spec->delay_reserve = setval;
 		break;
 	case 10:
-		if (!strcmp(iqn, "ALL")) {
+		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
 				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
@@ -829,7 +829,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		abort_release = setval;
 		break;
 	case 12:
-		if (!strcmp(iqn, "ALL")) {
+		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
 				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
@@ -845,7 +845,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		spec->error_inject = setval;
 		break;
 	case 13:
-		if (!strcmp(iqn, "ALL")) {
+		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
 				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
@@ -865,7 +865,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
-		if (!strcmp(iqn, "ALL")) {
+		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
 				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
@@ -889,7 +889,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			goto spec_error;
 		spec->percent_count = 0;
 		sleep(1);
-		if (!strcmp(iqn, "ALL")) {
+		if (strcmp(iqn, "ALL") == 0) {
 			spec = (ISTGT_LU_DISK *)istgt->logical_unit[1]->lun[0].spec;
 			if (!spec)
 				goto spec_error;
@@ -1247,7 +1247,7 @@ istgt_uctl_cmd_unload(UCTL_Ptr uctl)
 	}
 
 	rc = 0;
-	/* unload media from lun
+/* unload media from lun
 	switch (lu->type) {
 	case ISTGT_LU_TYPE_DVD:
 		MTX_LOCK(&lu->mutex);
@@ -2612,7 +2612,7 @@ istgt_uctl_cmd_dump(UCTL_Ptr uctl)
 						pgp = istgt_lu_find_portalgroup(uctl->istgt, lu->map[t].pg_tag);
 						if (pgp != NULL) {
 							for (x = 0; x < pgp->nportals; x++) {
-								if (!strcmp(pgp->portals[x]->host, conn->target_addr)) {
+								if (strcmp(pgp->portals[x]->host, conn->target_addr) == 0) {
 									break;
 								}
 							}
