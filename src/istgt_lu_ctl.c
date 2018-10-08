@@ -1405,8 +1405,8 @@ istgt_uctl_cmd_change(UCTL_Ptr uctl)
 	file = strsepq(&arg, delim);
 	size = strsepq(&arg, delim);
 
-	if (iqn == NULL || lun == NULL || type == NULL || flags == NULL
-	    || file == NULL || size == NULL || arg != NULL) {
+	if (iqn == NULL || lun == NULL || type == NULL || flags == NULL ||
+	    file == NULL || size == NULL || arg != NULL) {
 		istgt_uctl_snprintf(uctl, "ERR invalid parameters\n");
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
@@ -2125,9 +2125,10 @@ istgt_uctl_cmd_info(UCTL_Ptr uctl)
 		istgt_lock_gconns();
 		MTX_LOCK(&lu->mutex);
 		for (j = 1; j < MAX_LU_TSIH; j++) {
-			if (lu->tsih[j].initiator_port != NULL
-				&& lu->tsih[j].tsih != 0) {
-				conn = istgt_find_conn(lu->tsih[j].initiator_port,
+			if (lu->tsih[j].initiator_port != NULL &&
+			    lu->tsih[j].tsih != 0) {
+				conn = istgt_find_conn(
+				    lu->tsih[j].initiator_port,
 				    lu->name, lu->tsih[j].tsih);
 				if (conn == NULL || conn->sess == NULL)
 					continue;
@@ -2592,9 +2593,10 @@ istgt_uctl_cmd_dump(UCTL_Ptr uctl)
 		}
 
 		for (j = 1; j < MAX_LU_TSIH; j++) {
-			if (lu->tsih[j].initiator_port != NULL
-				&& lu->tsih[j].tsih != 0) {
-				conn = istgt_find_conn(lu->tsih[j].initiator_port,
+			if (lu->tsih[j].initiator_port != NULL &&
+			    lu->tsih[j].tsih != 0) {
+				conn = istgt_find_conn(
+				    lu->tsih[j].initiator_port,
 				    lu->name, lu->tsih[j].tsih);
 				if (conn == NULL || conn->sess == NULL)
 					continue;
@@ -3307,8 +3309,8 @@ istgt_uctl_cmd_execute(UCTL_Ptr uctl)
 
 	func = NULL;
 	for (i = 0; istgt_uctl_cmd_table[i].name != NULL; i++) {
-		if (cmd[0] == istgt_uctl_cmd_table[i].name[0]
-		    && strcmp(cmd, istgt_uctl_cmd_table[i].name) == 0) {
+		if (cmd[0] == istgt_uctl_cmd_table[i].name[0] &&
+		    strcmp(cmd, istgt_uctl_cmd_table[i].name) == 0) {
 			func = istgt_uctl_cmd_table[i].func;
 			break;
 		}
@@ -3336,8 +3338,7 @@ istgt_uctl_cmd_execute(UCTL_Ptr uctl)
 	}
 #endif
 
-	if (uctl->no_auth
-	    && (strcasecmp(cmd, "AUTH") == 0)) {
+	if (uctl->no_auth && (strcasecmp(cmd, "AUTH") == 0)) {
 		ISTGT_TRACELOG(ISTGT_TRACE_NET, "uctl_cmd:%d ERR auth not requried\n", i);
 		istgt_uctl_snprintf(uctl, "ERR auth not required\n");
 		rc = istgt_uctl_writeline(uctl);
@@ -3346,10 +3347,11 @@ istgt_uctl_cmd_execute(UCTL_Ptr uctl)
 		}
 		return (UCTL_CMD_ERR);
 	}
-	if (uctl->req_auth && uctl->authenticated == 0
-	    && !(strcasecmp(cmd, "QUIT") == 0
-		|| strcasecmp(cmd, "AUTH") == 0)) {
-		ISTGT_TRACELOG(ISTGT_TRACE_NET, "uctl_cmd:%d ERR auth requried\n", i);
+	if (uctl->req_auth && uctl->authenticated == 0 &&
+	    !(strcasecmp(cmd, "QUIT") == 0 ||
+	    strcasecmp(cmd, "AUTH") == 0)) {
+		ISTGT_TRACELOG(ISTGT_TRACE_NET,
+		    "uctl_cmd:%d ERR auth requried\n", i);
 		istgt_uctl_snprintf(uctl, "ERR auth required\n");
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
@@ -3531,8 +3533,8 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 
 	/* wildcard? */
 	if (uctl->family != AF_UNIX) {
-	if (strcasecmp(uctl->portal.host, "[::]") == 0
-	    || strcasecmp(uctl->portal.host, "[*]") == 0) {
+	if (strcasecmp(uctl->portal.host, "[::]") == 0 ||
+	    strcasecmp(uctl->portal.host, "[*]") == 0) {
 		if (uctl->family != AF_INET6) {
 			ISTGT_ERRLOG("address family error\n");
 			goto error_return;
@@ -3540,8 +3542,8 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 		snprintf(buf, sizeof (buf), "[%s]", uctl->caddr);
 		xfree(uctl->portal.host);
 		uctl->portal.host = xstrdup(buf);
-	} else if (strcasecmp(uctl->portal.host, "0.0.0.0") == 0
-	    || strcasecmp(uctl->portal.host, "*") == 0) {
+	} else if (strcasecmp(uctl->portal.host, "0.0.0.0") == 0 ||
+	    strcasecmp(uctl->portal.host, "*") == 0) {
 		if (uctl->family != AF_INET) {
 			ISTGT_ERRLOG("address family error\n");
 			goto error_return;
@@ -3676,8 +3678,8 @@ istgt_uctl_init(ISTGT_Ptr istgt)
 			ag_tag_i = 0;
 		} else {
 			if (strncasecmp(ag_tag, "AuthGroup",
-				strlen("AuthGroup")) != 0
-			    || sscanf(ag_tag, "%*[^0-9]%d", &ag_tag_i) != 1) {
+				    strlen("AuthGroup")) != 0 ||
+			    sscanf(ag_tag, "%*[^0-9]%d", &ag_tag_i) != 1) {
 				ISTGT_ERRLOG("auth group error\n");
 				return (-1);
 			}
