@@ -3371,7 +3371,7 @@ uctlworker(void *arg)
 	UCTL_Ptr uctl = (UCTL_Ptr) arg;
 	int rc;
 	pthread_t self = pthread_self();
-	snprintf(tinfo, sizeof tinfo, "u#%d.%ld", uctl->sock, (uint64_t)(((uint64_t *)self)[0]));
+	snprintf(tinfo, sizeof (tinfo), "u#%d.%ld", uctl->sock, (uint64_t)(((uint64_t *)self)[0]));
 #ifdef HAVE_PTHREAD_SET_NAME_NP
 	pthread_set_name_np(pthread_self(), tinfo);
 #endif
@@ -3449,8 +3449,8 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 	int rc;
 	int i;
 
-	uctl = xmalloc(sizeof *uctl);
-	memset(uctl, 0, sizeof *uctl);
+	uctl = xmalloc(sizeof (*uctl));
+	memset(uctl, 0, sizeof (*uctl));
 
 	uctl->istgt = istgt;
 	MTX_LOCK(&istgt->mutex);
@@ -3478,19 +3478,19 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 
 	uctl->recvtmpcnt = 0;
 	uctl->recvtmpidx = 0;
-	uctl->recvtmpsize = sizeof uctl->recvtmp;
-	uctl->recvbufsize = sizeof uctl->recvbuf;
-	uctl->sendbufsize = sizeof uctl->sendbuf;
-	uctl->worksize = sizeof uctl->work;
+	uctl->recvtmpsize = sizeof (uctl->recvtmp);
+	uctl->recvbufsize = sizeof (uctl->recvbuf);
+	uctl->sendbufsize = sizeof (uctl->sendbuf);
+	uctl->worksize = sizeof (uctl->work);
 
-	memset(uctl->caddr, 0, sizeof uctl->caddr);
-	memset(uctl->saddr, 0, sizeof uctl->saddr);
+	memset(uctl->caddr, 0, sizeof (uctl->caddr));
+	memset(uctl->saddr, 0, sizeof (uctl->saddr));
 
 	switch (sa->sa_family) {
 	case AF_INET6:
 		uctl->family = AF_INET6;
-		rc = istgt_getaddr(sock, uctl->saddr, sizeof uctl->saddr,
-		    uctl->caddr, sizeof uctl->caddr, &uctl->iaddr, (uint16_t *)&uctl->iport);
+		rc = istgt_getaddr(sock, uctl->saddr, sizeof (uctl->saddr),
+		    uctl->caddr, sizeof (uctl->caddr), &uctl->iaddr, (uint16_t *)&uctl->iport);
 		if (rc < 0) {
 			ISTGT_ERRLOG("istgt_getaddr() failed\n");
 			goto error_return;
@@ -3498,8 +3498,8 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 		break;
 	case AF_INET:
 		uctl->family = AF_INET;
-		rc = istgt_getaddr(sock, uctl->saddr, sizeof uctl->saddr,
-		    uctl->caddr, sizeof uctl->caddr, &uctl->iaddr, (uint16_t *)&uctl->iport);
+		rc = istgt_getaddr(sock, uctl->saddr, sizeof (uctl->saddr),
+		    uctl->caddr, sizeof (uctl->caddr), &uctl->iaddr, (uint16_t *)&uctl->iport);
 		if (rc < 0) {
 			ISTGT_ERRLOG("istgt_getaddr() failed\n");
 			goto error_return;
@@ -3537,7 +3537,7 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 			ISTGT_ERRLOG("address family error\n");
 			goto error_return;
 		}
-		snprintf(buf, sizeof buf, "[%s]", uctl->caddr);
+		snprintf(buf, sizeof (buf), "[%s]", uctl->caddr);
 		xfree(uctl->portal.host);
 		uctl->portal.host = xstrdup(buf);
 	} else if (strcasecmp(uctl->portal.host, "0.0.0.0") == 0
@@ -3546,7 +3546,7 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 			ISTGT_ERRLOG("address family error\n");
 			goto error_return;
 		}
-		snprintf(buf, sizeof buf, "%s", uctl->caddr);
+		snprintf(buf, sizeof (buf), "%s", uctl->caddr);
 		xfree(uctl->portal.host);
 		uctl->portal.host = xstrdup(buf);
 	}
