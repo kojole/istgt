@@ -661,7 +661,7 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 	setval = atoi(strsepq(&arg, delim));
 	ISTGT_LOG("%s %s %d %d %s\n", iqn, lun, setopt, setval, arg);
 
-	 if (iqn == NULL || (arg != NULL && setopt != 15)) {
+	if (iqn == NULL || (arg != NULL && setopt != 15)) {
 		istgt_uctl_snprintf(uctl, "ERR invalid parameters\n");
 		goto error_return;
 	}
