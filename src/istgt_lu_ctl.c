@@ -2538,7 +2538,7 @@ istgt_uctl_cmd_dump(UCTL_Ptr uctl)
 		for (j = 0; j < lu->maxmap && rem; j++) {
 			pgp = istgt_lu_find_portalgroup(uctl->istgt, lu->map[j].pg_tag);
 			if (pgp != NULL) {
-				for ( x = 0; x < pgp->nportals && rem; x++) {
+				for (x = 0; x < pgp->nportals && rem; x++) {
 					ln = snprintf(bp, rem, " IP%d:%s  ", x+1, pgp->portals[x]->host);
 					if (ln < 0)
 						ln = 0;
@@ -2609,7 +2609,7 @@ istgt_uctl_cmd_dump(UCTL_Ptr uctl)
 					for (t = 0; t < lu->maxmap; t++) {
 						pgp = istgt_lu_find_portalgroup(uctl->istgt, lu->map[t].pg_tag);
 						if (pgp != NULL) {
-							for ( x = 0; x < pgp->nportals; x++) {
+							for (x = 0; x < pgp->nportals; x++) {
 								if (!strcmp(pgp->portals[x]->host, conn->target_addr)) {
 									break;
 								}
@@ -2859,7 +2859,7 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 //		MTX_UNLOCK(&spec->cmd_queue_mutex);
 		/* luworker waiting data from zvol */
 #if 0
-		for (i = 0; i < spec->luworkers; i++ ) {
+		for (i = 0; i < spec->luworkers; i++) {
 			MTX_LOCK(&spec->luworker_mutex[i]);
 			if (spec->inflight_io[i] != NULL) {
 				tdiff(spec->inflight_io[i]->lu_cmd.times[0], now, r)
@@ -2877,7 +2877,7 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 		*bptr++ = ' '; *bptr++ = '-'; *bptr++ = ' '; brem -= 3;
 		/* luworker waiting data from network */
 		MTX_LOCK(&spec->wait_lu_task_mutex);
-		for (i = 0; i < ISTGT_MAX_NUM_LUWORKERS; i++ ) {
+		for (i = 0; i < ISTGT_MAX_NUM_LUWORKERS; i++) {
 			if (spec->wait_lu_task[i] != NULL) {
 				tdiff(spec->wait_lu_task[i]->lu_cmd.times[0], now, r)
 				wn = snprintf(bptr, brem, " %d:%x 0x%x.%lu+%uT%ld.%9.9ld",
@@ -3002,7 +3002,7 @@ istgt_uctl_cmd_iostats(UCTL_Ptr uctl)
 		length = snprintf(NULL, 0, "%"PRIu64, spec->size);
 		size = malloc(length + 1);
 		snprintf(size, length + 1, "%"PRIu64, spec->size);
-		usedlogicalblocks = ( spec->stats.used / spec->blocklen );
+		usedlogicalblocks = (spec->stats.used / spec->blocklen);
 
 		length = snprintf(NULL, 0, "%"PRIu64, usedlogicalblocks);
 		usedblocks = malloc(length + 1);
