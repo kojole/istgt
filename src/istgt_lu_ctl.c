@@ -3307,14 +3307,15 @@ _verb_istat ISCSIstat_now[ISCSI_ARYSZ] = { {0, 0, 0} };
 _verb_istat ISCSIstat_rslt[ISCSI_ARYSZ] = { {0, 0, 0} };
 
 #ifdef REPLICATION
-/* istgt_uctl_cmd_iostats collects the iostats from the spec structure
-** and marshal them into json format using json-c library.The returned
-** string memory is managed by the json_object and will be freed when
-** the reference count of the json_object drops to zero.Following command
-** can be used to fetch the iostats.
-** USE : sudo istgtcontrol iostats
-** TODO: Add the fields for getting the latency, used capacity etc.
-*/
+/*
+ * istgt_uctl_cmd_iostats collects the iostats from the spec structure
+ * and marshal them into json format using json-c library.The returned
+ * string memory is managed by the json_object and will be freed when
+ * the reference count of the json_object drops to zero.Following command
+ * can be used to fetch the iostats.
+ * USE : sudo istgtcontrol iostats
+ * TODO: Add the fields for getting the latency, used capacity etc.
+ */
 static int
 istgt_uctl_cmd_iostats(UCTL_Ptr uctl)
 {
@@ -3405,9 +3406,10 @@ istgt_uctl_cmd_iostats(UCTL_Ptr uctl)
 			free(size);
 			free(usedblocks);
 			free(sectorsize);
-			/* freeing root json_object will free all the allocated
-			** memory associated with the json_object.
-			*/
+			/*
+			 * freeing root json_object will free all the allocated
+			 * memory associated with the json_object.
+			 */
 			json_object_put(jobj);
 			return (rc);
 		}
