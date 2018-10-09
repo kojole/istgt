@@ -126,10 +126,9 @@ istgt_uctl_readline(UCTL_Ptr uctl)
 {
 	ssize_t total;
 
-	total = istgt_readline_socket(uctl->sock, uctl->recvbuf, uctl->recvbufsize,
-	    uctl->recvtmp, uctl->recvtmpsize,
-	    &uctl->recvtmpidx, &uctl->recvtmpcnt,
-	    uctl->timeout);
+	total = istgt_readline_socket(uctl->sock, uctl->recvbuf,
+	    uctl->recvbufsize, uctl->recvtmp, uctl->recvtmpsize,
+	    &uctl->recvtmpidx, &uctl->recvtmpcnt, uctl->timeout);
 	if (total < 0) {
 		return (UCTL_CMD_DISCON);
 	}
@@ -146,7 +145,8 @@ istgt_uctl_writeline(UCTL_Ptr uctl)
 	ssize_t expect;
 
 	expect = strlen(uctl->sendbuf);
-	total = istgt_writeline_socket(uctl->sock, uctl->sendbuf, uctl->timeout);
+	total = istgt_writeline_socket(uctl->sock, uctl->sendbuf,
+	    uctl->timeout);
 	if (total < 0) {
 		return (UCTL_CMD_DISCON);
 	}
@@ -156,7 +156,8 @@ istgt_uctl_writeline(UCTL_Ptr uctl)
 	return (UCTL_CMD_OK);
 }
 
-static int istgt_uctl_snprintf(UCTL_Ptr uctl, const char *format, ...) __attribute__((__format__(__printf__, 2, 3)));
+static int istgt_uctl_snprintf(UCTL_Ptr uctl, const char *format, ...)
+    __attribute__((__format__(__printf__, 2, 3)));
 
 static int
 istgt_uctl_snprintf(UCTL_Ptr uctl, const char *format, ...)
@@ -171,13 +172,15 @@ istgt_uctl_snprintf(UCTL_Ptr uctl, const char *format, ...)
 }
 
 static int
-istgt_uctl_get_media_present(ISTGT_LU_Ptr lu __attribute__((__unused__)), int lun __attribute__((__unused__)))
+istgt_uctl_get_media_present(ISTGT_LU_Ptr lu __attribute__((__unused__)),
+    int lun __attribute__((__unused__)))
 {
 	return (0);
 }
 
 static int
-istgt_uctl_get_media_lock(ISTGT_LU_Ptr lu __attribute__((__unused__)), int lun __attribute__((__unused__)))
+istgt_uctl_get_media_lock(ISTGT_LU_Ptr lu __attribute__((__unused__)),
+    int lun __attribute__((__unused__)))
 {
 	return (0);
 }
@@ -288,23 +291,27 @@ istgt_uctl_cmd_auth(UCTL_Ptr uctl)
 			istgt_uctl_snprintf(uctl, "ERR no response\n");
 			goto error_return;
 		}
-		// ISTGT_TRACELOG(ISTGT_TRACE_DEBUG, "N=%s, R=%s\n", chap_n, chap_r);
+		// ISTGT_TRACELOG(ISTGT_TRACE_DEBUG, "N=%s, R=%s\n",
+		//    chap_n, chap_r);
 
 		rc = istgt_hex2bin(resmd5, ISTGT_MD5DIGEST_LEN, chap_r);
 		if (rc < 0 || rc != ISTGT_MD5DIGEST_LEN) {
-			istgt_uctl_snprintf(uctl, "ERR response format error\n");
+			istgt_uctl_snprintf(uctl,
+			    "ERR response format error\n");
 			goto error_return;
 		}
 
 		rc = istgt_uctl_get_authinfo(uctl, chap_n);
 		if (rc < 0) {
 			ISTGT_ERRLOG("auth failed (user %.64s)\n", chap_n);
-			istgt_uctl_snprintf(uctl, "ERR auth user or secret is missing\n");
+			istgt_uctl_snprintf(uctl,
+			    "ERR auth user or secret is missing\n");
 			goto error_return;
 		}
 		if (uctl->auth.user == NULL || uctl->auth.secret == NULL) {
 			ISTGT_ERRLOG("auth failed (user %.64s)\n", chap_n);
-			istgt_uctl_snprintf(uctl, "ERR auth user or secret is missing\n");
+			istgt_uctl_snprintf(uctl,
+			    "ERR auth user or secret is missing\n");
 			goto error_return;
 		}
 
@@ -324,7 +331,8 @@ istgt_uctl_cmd_auth(UCTL_Ptr uctl)
 		if (memcmp(tgtmd5, resmd5, ISTGT_MD5DIGEST_LEN) != 0) {
 			/* not match */
 			ISTGT_ERRLOG("auth failed (user %.64s)\n", chap_n);
-			istgt_uctl_snprintf(uctl, "ERR auth user or secret is missing\n");
+			istgt_uctl_snprintf(uctl,
+			    "ERR auth user or secret is missing\n");
 			goto error_return;
 		}
 		/* OK client's secret */
@@ -335,18 +343,22 @@ istgt_uctl_cmd_auth(UCTL_Ptr uctl)
 		chap_c = strsepq(&arg, delim);
 		if (chap_i != NULL && chap_c != NULL) {
 			/* Identifier */
-			uctl->auth.chap_mid[0] = (uint8_t) strtol(chap_i, NULL, 10);
+			uctl->auth.chap_mid[0] =
+			    (uint8_t) strtol(chap_i, NULL, 10);
 			/* Challenge Value */
 			rc = istgt_hex2bin(uctl->auth.chap_mchallenge,
 			    ISTGT_CHAP_CHALLENGE_LEN, chap_c);
 			if (rc < 0) {
-				istgt_uctl_snprintf(uctl, "ERR challenge format error\n");
+				istgt_uctl_snprintf(uctl,
+				    "ERR challenge format error\n");
 				goto error_return;
 			}
 			uctl->auth.chap_mchallenge_len = rc;
 
-			if (uctl->auth.muser == NULL || uctl->auth.msecret == NULL) {
-				ISTGT_ERRLOG("auth failed (user %.64s)\n", chap_n);
+			if (uctl->auth.muser == NULL ||
+			    uctl->auth.msecret == NULL) {
+				ISTGT_ERRLOG("auth failed (user %.64s)\n",
+				    chap_n);
 				istgt_uctl_snprintf(uctl,
 				    "ERR auth user or secret is missing\n");
 				goto error_return;
@@ -380,7 +392,8 @@ istgt_uctl_cmd_auth(UCTL_Ptr uctl)
 			/* not mutual */
 			if (uctl->req_mutual) {
 				ISTGT_ERRLOG("required mutual CHAP\n");
-				istgt_uctl_snprintf(uctl, "ERR CHAP sequence error\n");
+				istgt_uctl_snprintf(uctl,
+				    "ERR CHAP sequence error\n");
 				goto error_return;
 			}
 		}
@@ -496,7 +509,8 @@ istgt_uctl_cmd_sync(UCTL_Ptr uctl)
 		rc = istgt_lu_disk_sync_reservation(lu, lun_i);
 		MTX_UNLOCK(&lu->mutex);
 		if (rc < 0)
-			istgt_uctl_snprintf(uctl, "ERR in sync cmd execution\n");
+			istgt_uctl_snprintf(uctl,
+			    "ERR in sync cmd execution\n");
 	} else {
 		istgt_uctl_snprintf(uctl, "ERR sync_rsv \n");
 		rc = -1;
@@ -560,7 +574,8 @@ istgt_uctl_cmd_snap(UCTL_Ptr uctl)
 	}
 	spec = lu->lun[0].spec;
 	if (strcmp(uctl->cmd, "SNAPCREATE") == 0)
-		r = istgt_lu_create_snapshot(spec, snapname, io_wait_time, wait_time);
+		r = istgt_lu_create_snapshot(spec, snapname, io_wait_time,
+		    wait_time);
 	else
 		r = istgt_lu_destroy_snapshot(spec, snapname);
 	if (r == true) {
@@ -671,7 +686,9 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		goto error_return;
 	}
 	if (setval < 0) {
-		istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d for opt %d\n", setval, setopt);
+		istgt_uctl_snprintf(uctl,
+		    "ERR invalid parameter value %d for opt %d\n",
+		    setval, setopt);
 		goto error_return;
 	}
 	if (strcmp(iqn, "ALL")) {
@@ -686,7 +703,8 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 	switch (setopt) {
 	case 1:
 		if (setval > 1 || setval < 0) {
-			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
+			istgt_uctl_snprintf(uctl,
+			    "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
 		ISTGT_LOG("send_abrt_resp %d->%d\n", send_abrt_resp, setval);
@@ -694,15 +712,18 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		break;
 	case 2:
 		if (setval > 1 || setval < 0) {
-			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
+			istgt_uctl_snprintf(uctl,
+			    "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
-		ISTGT_LOG("abort_result_queue %d->%d\n", abort_result_queue, setval);
+		ISTGT_LOG("abort_result_queue %d->%d\n",
+		    abort_result_queue, setval);
 		abort_result_queue = setval;
 		break;
 	case 3:
 		if (setval > 1 || setval < 0) {
-			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
+			istgt_uctl_snprintf(uctl,
+			    "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
 		ISTGT_LOG("wait_inflights %d->%d\n", wait_inflights, setval);
@@ -710,12 +731,14 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		break;
 	case 4:
 		if (setval < 1) {
-			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
+			istgt_uctl_snprintf(uctl,
+			    "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
 		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
-				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
+				spec = (ISTGT_LU_DISK *)
+				    istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
 					goto spec_error;
 				spec->max_unmap_sectors = setval;
@@ -725,12 +748,14 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		}
 		if (!spec)
 			goto spec_error;
-		ISTGT_LOG("%s->max_unmap_sectors %d->%d\n", iqn, spec->max_unmap_sectors, setval);
+		ISTGT_LOG("%s->max_unmap_sectors %d->%d\n",
+		    iqn, spec->max_unmap_sectors, setval);
 		spec->max_unmap_sectors = setval;
 		break;
 	case 5:
 		if (setval > 1 || setval < 0) {
-			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
+			istgt_uctl_snprintf(uctl,
+			    "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
 		ISTGT_LOG("clear_resv %d->%d\n", clear_resv, setval);
@@ -738,12 +763,14 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		break;
 	case 6:
 		if (setval > 1 || setval < 0) {
-			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
+			istgt_uctl_snprintf(uctl,
+			    "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
 		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
-				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
+				spec = (ISTGT_LU_DISK *)
+				    istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
 					goto spec_error;
 				spec->ats = setval;
@@ -758,12 +785,14 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		break;
 	case 7:
 		if (setval > 1 || setval < 0) {
-			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
+			istgt_uctl_snprintf(uctl,
+			    "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
 		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
-				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
+				spec = (ISTGT_LU_DISK *)
+				    istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
 					goto spec_error;
 				spec->xcopy = setval;
@@ -784,14 +813,16 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			ISTGT_LOG("ALL->limit_q_size ->%d\n", setval);
 			break;
 		} else {
-			ISTGT_LOG("%s->limit_q_size %d->%d\n", iqn,  lu->limit_q_size, setval);
+			ISTGT_LOG("%s->limit_q_size %d->%d\n",
+			    iqn, lu->limit_q_size, setval);
 			lu->limit_q_size = setval;
 		}
 		break;
 	case 9:
 		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
-				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
+				spec = (ISTGT_LU_DISK *)
+				    istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
 					goto spec_error;
 				spec->delay_reserve = setval;
@@ -801,13 +832,15 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		}
 		if (!spec)
 			goto spec_error;
-		ISTGT_LOG("%s->delay_reserve %d->%d\n", iqn, spec->delay_reserve, setval);
+		ISTGT_LOG("%s->delay_reserve %d->%d\n",
+		    iqn, spec->delay_reserve, setval);
 		spec->delay_reserve = setval;
 		break;
 	case 10:
 		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
-				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
+				spec = (ISTGT_LU_DISK *)
+				    istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
 					goto spec_error;
 				spec->delay_release = setval;
@@ -817,12 +850,14 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		}
 		if (!spec)
 			goto spec_error;
-		ISTGT_LOG("%s->delay_release %d->%d\n", iqn, spec->delay_release, setval);
+		ISTGT_LOG("%s->delay_release %d->%d\n",
+		    iqn, spec->delay_release, setval);
 		spec->delay_release = setval;
 		break;
 	case 11:
 		if (setval > 1 || setval < 0) {
-			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
+			istgt_uctl_snprintf(uctl,
+			    "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
 		ISTGT_LOG("abort_release %d->%d\n", abort_release, setval);
@@ -831,7 +866,8 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 	case 12:
 		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
-				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
+				spec = (ISTGT_LU_DISK *)
+				    istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
 					goto spec_error;
 				spec->error_inject = setval;
@@ -841,13 +877,15 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		}
 		if (!spec)
 			goto spec_error;
-		ISTGT_LOG("%s->error_inject 0x%x->0x%x\n", iqn, spec->error_inject, setval);
+		ISTGT_LOG("%s->error_inject 0x%x->0x%x\n",
+		    iqn, spec->error_inject, setval);
 		spec->error_inject = setval;
 		break;
 	case 13:
 		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
-				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
+				spec = (ISTGT_LU_DISK *)
+				    istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
 					goto spec_error;
 				spec->inject_cnt = setval;
@@ -857,17 +895,20 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		}
 		if (!spec)
 			goto spec_error;
-		ISTGT_LOG("%s->inject_cnt %d->%d\n", iqn, spec->inject_cnt, setval);
+		ISTGT_LOG("%s->inject_cnt %d->%d\n",
+		    iqn, spec->inject_cnt, setval);
 		spec->inject_cnt = setval;
 		break;
 	case 14:
 		if (setval > 1) {
-			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
+			istgt_uctl_snprintf(uctl,
+			    "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
 		if (strcmp(iqn, "ALL") == 0) {
 			for (i = 1; i <= istgt->nlogical_unit; i++) {
-				spec = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
+				spec = (ISTGT_LU_DISK *)
+				    istgt->logical_unit[i]->lun[0].spec;
 				if (!spec)
 					goto spec_error;
 				spec->exit_lu_worker = setval;
@@ -877,12 +918,14 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		}
 		if (!spec)
 			goto spec_error;
-		ISTGT_LOG("%s->exit_lu_worker %d->%d\n", iqn, spec->exit_lu_worker, setval);
+		ISTGT_LOG("%s->exit_lu_worker %d->%d\n",
+		    iqn, spec->exit_lu_worker, setval);
 		spec->exit_lu_worker = setval;
 		break;
 	case 15:
 		if (setval < 2 || setval%2 != 0) {
-			istgt_uctl_snprintf(uctl, "ERR invalid parameter value %d\n", setval);
+			istgt_uctl_snprintf(uctl,
+			    "ERR invalid parameter value %d\n", setval);
 			goto error_return;
 		}
 		if (!spec)
@@ -890,7 +933,8 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		spec->percent_count = 0;
 		sleep(1);
 		if (strcmp(iqn, "ALL") == 0) {
-			spec = (ISTGT_LU_DISK *)istgt->logical_unit[1]->lun[0].spec;
+			spec = (ISTGT_LU_DISK *)
+			    istgt->logical_unit[1]->lun[0].spec;
 			if (!spec)
 				goto spec_error;
 			tot = 0;
@@ -904,16 +948,20 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 			}
 
 			if (tot != 100) {
-				istgt_uctl_snprintf(uctl, "ERR in tot %d percentage\n", tot);
+				istgt_uctl_snprintf(uctl,
+				    "ERR in tot %d percentage\n", tot);
 				goto error_return;
 			}
 			spec->percent_count = (j>>1);
 
 			for (i = 2; i <= istgt->nlogical_unit; i++) {
-				spec1 = (ISTGT_LU_DISK *)istgt->logical_unit[i]->lun[0].spec;
+				spec1 = (ISTGT_LU_DISK *)
+				    istgt->logical_unit[i]->lun[0].spec;
 				for (j = 0; j < setval; j += 2) {
-					spec1->percent_val[j>>1] = spec->percent_val[j>>1];
-					spec1->percent_latency[j>>1] = spec->percent_latency[j>>1];
+					spec1->percent_val[j>>1] =
+					    spec->percent_val[j>>1];
+					spec1->percent_latency[j>>1] =
+					    spec->percent_latency[j>>1];
 				}
 				spec1->percent_count = (j>>1);
 			}
@@ -930,7 +978,8 @@ istgt_uctl_cmd_set(UCTL_Ptr uctl)
 		}
 
 		if (tot != 100) {
-			istgt_uctl_snprintf(uctl, "ERR in tot %d percentage\n", tot);
+			istgt_uctl_snprintf(uctl,
+			    "ERR in tot %d percentage\n", tot);
 			goto error_return;
 		}
 
@@ -1015,7 +1064,8 @@ istgt_uctl_cmd_persist(UCTL_Ptr uctl)
 		rc = istgt_lu_disk_persist_reservation(lu, lun_i, persistopt);
 		MTX_UNLOCK(&lu->mutex);
 		if (rc < 0)
-			istgt_uctl_snprintf(uctl, "ERR in persist cmd execution\n");
+			istgt_uctl_snprintf(uctl,
+			    "ERR in persist cmd execution\n");
 	} else {
 		istgt_uctl_snprintf(uctl, "ERR clear_rsv \n");
 		rc = -1;
@@ -1030,7 +1080,8 @@ istgt_uctl_cmd_persist(UCTL_Ptr uctl)
 			return (UCTL_CMD_ERR);
 	}
 	/* logging event */
-	ISTGT_NOTICELOG("Unit Rsv_Persist %s lun%d from %s\n", iqn, lun_i, uctl->caddr);
+	ISTGT_NOTICELOG("Unit Rsv_Persist %s lun%d from %s\n",
+	    iqn, lun_i, uctl->caddr);
 	/* Persist succeeded */
 	istgt_uctl_snprintf(uctl, "OK %s\n", uctl->cmd);
 	rc = istgt_uctl_writeline(uctl);
@@ -1082,7 +1133,8 @@ istgt_uctl_cmd_list(UCTL_Ptr uctl)
 			lu = uctl->istgt->logical_unit[i];
 			if (lu == NULL)
 				continue;
-			istgt_uctl_snprintf(uctl, "%s %s LU%d\n", uctl->cmd, lu->name, lu->num);
+			istgt_uctl_snprintf(uctl,
+			    "%s %s LU%d\n", uctl->cmd, lu->name, lu->num);
 			rc = istgt_uctl_writeline(uctl);
 			if (rc != UCTL_CMD_OK) {
 				MTX_UNLOCK(&uctl->istgt->mutex);
@@ -1121,14 +1173,15 @@ istgt_uctl_cmd_list(UCTL_Ptr uctl)
 
 		switch (llp->type) {
 		case ISTGT_LU_LUN_TYPE_REMOVABLE:
-			mflags = istgt_lu_get_media_flags_string(llp->u.removable.flags,
-			    workp, worksize);
+			mflags = istgt_lu_get_media_flags_string(
+			    llp->u.removable.flags, workp, worksize);
 			worksize -= strlen(mflags) + 1;
 			workp += strlen(mflags) + 1;
 			present = istgt_uctl_get_media_present(lu, lun_i);
 			lock = istgt_uctl_get_media_lock(lu, lun_i);
 			mfile = llp->u.removable.file;
-			if (llp->u.removable.flags & ISTGT_LU_FLAG_MEDIA_AUTOSIZE) {
+			if (llp->u.removable.flags &
+			    ISTGT_LU_FLAG_MEDIA_AUTOSIZE) {
 				snprintf(workp, worksize, "auto");
 			} else {
 				snprintf(workp, worksize, "%"PRIu64,
@@ -1142,7 +1195,8 @@ istgt_uctl_cmd_list(UCTL_Ptr uctl)
 			worksize -= strlen(msize) + 1;
 			workp += strlen(msize) + 1;
 
-			istgt_uctl_snprintf(uctl, "%s lun%u %s %s %s %s %s \"%s\" %s\n",
+			istgt_uctl_snprintf(uctl,
+			    "%s lun%u %s %s %s %s %s \"%s\" %s\n",
 			    uctl->cmd, lun_i,
 			    "removable",
 			    (present ? "present" : "absent"),
@@ -1688,7 +1742,8 @@ istgt_uctl_cmd_clear(UCTL_Ptr uctl)
 		rc = istgt_lu_disk_clear_reservation(lu, lun_i);
 		MTX_UNLOCK(&lu->mutex);
 		if (rc < 0)
-			istgt_uctl_snprintf(uctl, "ERR in clear cmd execution\n");
+			istgt_uctl_snprintf(uctl,
+			    "ERR in clear cmd execution\n");
 	} else {
 		istgt_uctl_snprintf(uctl, "ERR clear_rsv \n");
 		rc = -1;
@@ -1729,8 +1784,10 @@ istgt_uctl_cmd_refresh(UCTL_Ptr uctl)
 		uctl->istgt->inconfig = 1;
 	MTX_UNLOCK(&uctl->istgt->state_mutex);
 	if (inconfig == 1) {
-		ISTGT_LOG("Previous istgtcontrol refresh/load is still running..n");
-		istgt_uctl_snprintf(uctl, "Error Previous Refresh command still running\n");
+		ISTGT_LOG("Previous istgtcontrol refresh/load is"
+		    "still running..n");
+		istgt_uctl_snprintf(uctl,
+		    "Error Previous Refresh command still running\n");
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
 			return (rc);
@@ -1929,7 +1986,8 @@ istgt_uctl_cmd_modify(UCTL_Ptr uctl)
 	}
 
 	if (dofake < 0 || arg != NULL) {
-		ISTGT_LOG("modify %d returning.. ERR invalid parameters\n", dofake);
+		ISTGT_LOG("modify %d returning.. ERR invalid parameters\n",
+		    dofake);
 		istgt_uctl_snprintf(uctl, "ERR invalid parameters\n");
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
@@ -2071,14 +2129,18 @@ istgt_uctl_cmd_log(UCTL_Ptr uctl)
 		g_logdelayns = 0;
 
 	ISTGT_LOG("cmd_log[%s] trace:%x->%x  delayedlog:%d->%d  us:%ld->%ld\n",
-			uctl->cmd, oldtrace, g_trace_flag, oldlogtimes, g_logtimes,
-			olddelayms > 0 ? olddelayms/1000: 0,
-			g_logdelayns > 0 ? g_logdelayns/1000: 0);
+	    uctl->cmd, oldtrace, g_trace_flag,
+	    oldlogtimes, g_logtimes,
+	    olddelayms > 0 ? olddelayms/1000: 0,
+	    g_logdelayns > 0 ? g_logdelayns/1000: 0);
 
-	istgt_uctl_snprintf(uctl, "OK cmd_log[%s] trace:%x->%x  delayedlog:%d->%d  ms:%ld->%ld\n",
-			uctl->cmd, oldtrace, g_trace_flag, oldlogtimes, g_logtimes,
-			olddelayms > 0 ? olddelayms/1000000: 0,
-			g_logdelayns > 0 ? g_logdelayns/1000000: 0);
+	istgt_uctl_snprintf(uctl,
+	    "OK cmd_log[%s] trace:%x->%x  "
+	    "delayedlog:%d->%d  ms:%ld->%ld\n",
+	    uctl->cmd, oldtrace, g_trace_flag,
+	    oldlogtimes, g_logtimes,
+	    olddelayms > 0 ? olddelayms/1000000: 0,
+	    g_logdelayns > 0 ? g_logdelayns/1000000: 0);
 
 	/* succeeded */
 	rc = istgt_uctl_writeline(uctl);
@@ -2140,32 +2202,40 @@ istgt_uctl_cmd_info(UCTL_Ptr uctl)
 					if (conn == NULL)
 						continue;
 
-					istgt_uctl_snprintf(uctl, "%s w#%d: Login from %s (%s) on %s LU%d LU_Online=%s"
-					    " (%s:%s,%d), ISID=%"PRIx64", TSIH=%u,"
-					    " CID=%u, HeaderDigest=%s, DataDigest=%s,"
+					istgt_uctl_snprintf(uctl,
+					    "%s w#%d: Login from %s (%s) on %s"
+					    " LU%d LU_Online=%s (%s:%s,%d),"
+					    " ISID=%"PRIx64", TSIH=%u, CID=%u,"
+					    " HeaderDigest=%s, DataDigest=%s,"
 					    " MaxConnections=%u,"
-					    " FirstBurstLength=%u, MaxBurstLength=%u,"
+					    " FirstBurstLength=%u,"
+					    " MaxBurstLength=%u,"
 					    " MaxRecvDataSegmentLength=%u,"
-					    " InitialR2T=%s, ImmediateData=%s, PendingPDUs=%d\n",
+					    " InitialR2T=%s, ImmediateData=%s,"
+					    " PendingPDUs=%d\n",
 					    uctl->cmd,
 					    conn->id,
 					    conn->initiator_name,
 					    conn->initiator_addr,
 					    conn->target_name, lu->num,
 					    (lu->online ? "Yes" : "No"),
-					    conn->portal.host, conn->portal.port,
+					    conn->portal.host,
+					    conn->portal.port,
 					    conn->portal.tag,
 					    conn->sess->isid, conn->sess->tsih,
 					    conn->cid,
-					    (conn->header_digest ? "on" : "off"),
+					    (conn->header_digest ?
+							    "on" : "off"),
 					    (conn->data_digest ? "on" : "off"),
 					    conn->sess->MaxConnections,
 					    conn->sess->FirstBurstLength,
 					    conn->sess->MaxBurstLength,
 					    conn->MaxRecvDataSegmentLength,
-					    (conn->sess->initial_r2t ? "Yes" : "No"),
-					    (conn->sess->immediate_data ? "Yes" : "No"),
-						conn->pending_pdus.num);
+					    (conn->sess->initial_r2t ?
+							    "Yes" : "No"),
+					    (conn->sess->immediate_data ?
+							    "Yes" : "No"),
+					    conn->pending_pdus.num);
 					rc = istgt_uctl_writeline(uctl);
 					if (rc != UCTL_CMD_OK) {
 						MTX_UNLOCK(&sess->mutex);
@@ -2233,7 +2303,8 @@ istgt_uctl_cmd_status(UCTL_Ptr uctl)
 
 	/* Print Operational Mode */
 	istgt_uctl_snprintf(uctl, "%s Running:%s\n", uctl->cmd,
-		(uctl->istgt->OperationalMode)? "FAKE MODE OF OPERATION" : "NORMAL MODE OF OPERATION");
+	    (uctl->istgt->OperationalMode)? "FAKE MODE OF OPERATION" :
+			    "NORMAL MODE OF OPERATION");
 	rc = istgt_uctl_writeline(uctl);
 	if (rc != UCTL_CMD_OK) {
 		return (rc);
@@ -2258,7 +2329,9 @@ istgt_uctl_cmd_status(UCTL_Ptr uctl)
 			return (UCTL_CMD_ERR);
 		}
 		/* Print Status */
-		istgt_uctl_snprintf(uctl, "%s %s %s\n", uctl->cmd, lu->name, (status == ISTGT_LUN_BUSY) ?  "FAKE" : "REAL");
+		istgt_uctl_snprintf(uctl, "%s %s %s\n",
+		    uctl->cmd, lu->name,
+		    (status == ISTGT_LUN_BUSY) ?  "FAKE" : "REAL");
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
 			MTX_UNLOCK(&uctl->istgt->mutex);
@@ -2311,7 +2384,8 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 		lu = uctl->istgt->logical_unit[i];
 		if (lu == NULL)
 			continue;
-		if ((iqn != NULL && strcmp(iqn, lu->name) != 0) && (strcmp(iqn, "ALL") != 0))
+		if ((iqn != NULL && strcmp(iqn, lu->name) != 0) &&
+		    (strcmp(iqn, "ALL") != 0))
 			continue;
 
 		spec = (ISTGT_LU_DISK *)lu->lun[0].spec;
@@ -2321,12 +2395,16 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 				spec->IO_size[ind].write.total_time.tv_nsec = 0;
 				spec->IO_size[ind].read.total_time.tv_sec = 0;
 				spec->IO_size[ind].read.total_time.tv_nsec = 0;
-				spec->IO_size[ind].cmp_n_write.total_time.tv_sec = 0;
-				spec->IO_size[ind].cmp_n_write.total_time.tv_nsec = 0;
+				spec->IO_size[ind]
+				    .cmp_n_write.total_time.tv_sec = 0;
+				spec->IO_size[ind]
+				    .cmp_n_write.total_time.tv_nsec = 0;
 				spec->IO_size[ind].unmp.total_time.tv_sec = 0;
 				spec->IO_size[ind].unmp.total_time.tv_nsec = 0;
-				spec->IO_size[ind].write_same.total_time.tv_sec = 0;
-				spec->IO_size[ind].write_same.total_time.tv_nsec = 0;
+				spec->IO_size[ind]
+				    .write_same.total_time.tv_sec = 0;
+				spec->IO_size[ind]
+				    .write_same.total_time.tv_nsec = 0;
 			}
 			istgt_uctl_snprintf(uctl, "OK %s\n", uctl->cmd);
 			rc = istgt_uctl_writeline(uctl);
@@ -2335,31 +2413,65 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 			}
 			return (UCTL_CMD_OK);
 		}
-		istgt_uctl_snprintf(uctl, "%s LU%d %s\n", uctl->cmd, lu->num, lu->name);
+		istgt_uctl_snprintf(uctl, "%s LU%d %s\n",
+		    uctl->cmd, lu->num, lu->name);
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
 			return (rc);
 		}
 		for (ind = 0; ind < 10; ind++) {
-			if (spec->IO_size[ind].write.total_time.tv_sec != 0 || spec->IO_size[ind].write.total_time.tv_nsec != 0) {
-				istgt_uctl_snprintf(uctl, "%s WR       |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].write.lba, spec->IO_size[ind].write.lblen,
-					spec->IO_size[ind].write.total_time.tv_sec, spec->IO_size[ind].write.total_time.tv_nsec,
-					spec->IO_size[ind].write.caller[1] ? spec->IO_size[ind].write.caller[1] : '9',
-					spec->IO_size[ind].write.tdiff[1].tv_sec, spec->IO_size[ind].write.tdiff[1].tv_nsec,
-					spec->IO_size[ind].write.caller[2] ? spec->IO_size[ind].write.caller[2] : '9',
-					spec->IO_size[ind].write.tdiff[2].tv_sec, spec->IO_size[ind].write.tdiff[2].tv_nsec,
-					spec->IO_size[ind].write.caller[3] ? spec->IO_size[ind].write.caller[3] : '9',
-					spec->IO_size[ind].write.tdiff[3].tv_sec, spec->IO_size[ind].write.tdiff[3].tv_nsec,
-					spec->IO_size[ind].write.caller[4] ? spec->IO_size[ind].write.caller[4] : '9',
-					spec->IO_size[ind].write.tdiff[4].tv_sec, spec->IO_size[ind].write.tdiff[4].tv_nsec,
-					spec->IO_size[ind].write.caller[5] ? spec->IO_size[ind].write.caller[5] : '9',
-					spec->IO_size[ind].write.tdiff[5].tv_sec, spec->IO_size[ind].write.tdiff[5].tv_nsec,
-					spec->IO_size[ind].write.caller[6] ? spec->IO_size[ind].write.caller[6] : '9',
-					spec->IO_size[ind].write.tdiff[6].tv_sec, spec->IO_size[ind].write.tdiff[6].tv_nsec,
-					spec->IO_size[ind].write.caller[7] ? spec->IO_size[ind].write.caller[7] : '9',
-					spec->IO_size[ind].write.tdiff[7].tv_sec, spec->IO_size[ind].write.tdiff[7].tv_nsec,
-					spec->IO_size[ind].write.caller[8] ? spec->IO_size[ind].write.caller[8] : '9',
-					spec->IO_size[ind].write.tdiff[8].tv_sec, spec->IO_size[ind].write.tdiff[8].tv_nsec
+			if (spec->IO_size[ind].write.total_time.tv_sec != 0 ||
+			    spec->IO_size[ind].write.total_time.tv_nsec != 0) {
+				istgt_uctl_snprintf(uctl,
+				    "%s WR       |%10lu + %4lu| %ld.%9.9ld"
+				    " [%c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld]\n",
+				    uctl->cmd, spec->IO_size[ind].write.lba,
+				    spec->IO_size[ind].write.lblen,
+				    spec->IO_size[ind].write.total_time.tv_sec,
+				    spec->IO_size[ind].write.total_time.tv_nsec,
+				    spec->IO_size[ind].write.caller[1] ?
+					    spec->IO_size[ind].write.caller[1] :
+					    '9',
+				    spec->IO_size[ind].write.tdiff[1].tv_sec,
+				    spec->IO_size[ind].write.tdiff[1].tv_nsec,
+				    spec->IO_size[ind].write.caller[2] ?
+					    spec->IO_size[ind].write.caller[2] :
+					    '9',
+				    spec->IO_size[ind].write.tdiff[2].tv_sec,
+				    spec->IO_size[ind].write.tdiff[2].tv_nsec,
+				    spec->IO_size[ind].write.caller[3] ?
+					    spec->IO_size[ind].write.caller[3] :
+					    '9',
+				    spec->IO_size[ind].write.tdiff[3].tv_sec,
+				    spec->IO_size[ind].write.tdiff[3].tv_nsec,
+				    spec->IO_size[ind].write.caller[4] ?
+					    spec->IO_size[ind].write.caller[4] :
+					    '9',
+				    spec->IO_size[ind].write.tdiff[4].tv_sec,
+				    spec->IO_size[ind].write.tdiff[4].tv_nsec,
+				    spec->IO_size[ind].write.caller[5] ?
+					    spec->IO_size[ind].write.caller[5] :
+					    '9',
+				    spec->IO_size[ind].write.tdiff[5].tv_sec,
+				    spec->IO_size[ind].write.tdiff[5].tv_nsec,
+				    spec->IO_size[ind].write.caller[6] ?
+					    spec->IO_size[ind].write.caller[6] :
+					    '9',
+				    spec->IO_size[ind].write.tdiff[6].tv_sec,
+				    spec->IO_size[ind].write.tdiff[6].tv_nsec,
+				    spec->IO_size[ind].write.caller[7] ?
+					    spec->IO_size[ind].write.caller[7] :
+					    '9',
+				    spec->IO_size[ind].write.tdiff[7].tv_sec,
+				    spec->IO_size[ind].write.tdiff[7].tv_nsec,
+				    spec->IO_size[ind].write.caller[8] ?
+					    spec->IO_size[ind].write.caller[8] :
+					    '9',
+				    spec->IO_size[ind].write.tdiff[8].tv_sec,
+				    spec->IO_size[ind].write.tdiff[8].tv_nsec
 				);
 				rc = istgt_uctl_writeline(uctl);
 				if (rc != UCTL_CMD_OK) {
@@ -2368,25 +2480,58 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 			}
 		}
 		for (ind = 0; ind < 10; ind++) {
-			if (spec->IO_size[ind].read.total_time.tv_sec != 0 || spec->IO_size[ind].read.total_time.tv_nsec != 0) {
-				istgt_uctl_snprintf(uctl, "%s RD       |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].read.lba, spec->IO_size[ind].read.lblen,
-					spec->IO_size[ind].read.total_time.tv_sec, spec->IO_size[ind].read.total_time.tv_nsec,
-					spec->IO_size[ind].read.caller[1] ? spec->IO_size[ind].read.caller[1] : '9',
-					spec->IO_size[ind].read.tdiff[1].tv_sec, spec->IO_size[ind].read.tdiff[1].tv_nsec,
-					spec->IO_size[ind].read.caller[2] ? spec->IO_size[ind].read.caller[2] : '9',
-					spec->IO_size[ind].read.tdiff[2].tv_sec, spec->IO_size[ind].read.tdiff[2].tv_nsec,
-					spec->IO_size[ind].read.caller[3] ? spec->IO_size[ind].read.caller[3] : '9',
-					spec->IO_size[ind].read.tdiff[3].tv_sec, spec->IO_size[ind].read.tdiff[3].tv_nsec,
-					spec->IO_size[ind].read.caller[4] ? spec->IO_size[ind].read.caller[4] : '9',
-					spec->IO_size[ind].read.tdiff[4].tv_sec, spec->IO_size[ind].read.tdiff[4].tv_nsec,
-					spec->IO_size[ind].read.caller[5] ? spec->IO_size[ind].read.caller[5] : '9',
-					spec->IO_size[ind].read.tdiff[5].tv_sec, spec->IO_size[ind].read.tdiff[5].tv_nsec,
-					spec->IO_size[ind].read.caller[6] ? spec->IO_size[ind].read.caller[6] : '9',
-					spec->IO_size[ind].read.tdiff[6].tv_sec, spec->IO_size[ind].read.tdiff[6].tv_nsec,
-					spec->IO_size[ind].read.caller[7] ? spec->IO_size[ind].read.caller[7] : '9',
-					spec->IO_size[ind].read.tdiff[7].tv_sec, spec->IO_size[ind].read.tdiff[7].tv_nsec,
-					spec->IO_size[ind].read.caller[8] ? spec->IO_size[ind].read.caller[8] : '9',
-					spec->IO_size[ind].read.tdiff[8].tv_sec, spec->IO_size[ind].read.tdiff[8].tv_nsec
+			if (spec->IO_size[ind].read.total_time.tv_sec != 0 ||
+			    spec->IO_size[ind].read.total_time.tv_nsec != 0) {
+				istgt_uctl_snprintf(uctl,
+				    "%s RD       |%10lu + %4lu| %ld.%9.9ld"
+				    " [%c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld]\n",
+				    uctl->cmd, spec->IO_size[ind].read.lba,
+				    spec->IO_size[ind].read.lblen,
+				    spec->IO_size[ind].read.total_time.tv_sec,
+				    spec->IO_size[ind].read.total_time.tv_nsec,
+				    spec->IO_size[ind].read.caller[1] ?
+					    spec->IO_size[ind].read.caller[1] :
+					    '9',
+				    spec->IO_size[ind].read.tdiff[1].tv_sec,
+				    spec->IO_size[ind].read.tdiff[1].tv_nsec,
+				    spec->IO_size[ind].read.caller[2] ?
+					    spec->IO_size[ind].read.caller[2] :
+					    '9',
+				    spec->IO_size[ind].read.tdiff[2].tv_sec,
+				    spec->IO_size[ind].read.tdiff[2].tv_nsec,
+				    spec->IO_size[ind].read.caller[3] ?
+					    spec->IO_size[ind].read.caller[3] :
+					    '9',
+				    spec->IO_size[ind].read.tdiff[3].tv_sec,
+				    spec->IO_size[ind].read.tdiff[3].tv_nsec,
+				    spec->IO_size[ind].read.caller[4] ?
+					    spec->IO_size[ind].read.caller[4] :
+					    '9',
+				    spec->IO_size[ind].read.tdiff[4].tv_sec,
+				    spec->IO_size[ind].read.tdiff[4].tv_nsec,
+				    spec->IO_size[ind].read.caller[5] ?
+					    spec->IO_size[ind].read.caller[5] :
+					    '9',
+				    spec->IO_size[ind].read.tdiff[5].tv_sec,
+				    spec->IO_size[ind].read.tdiff[5].tv_nsec,
+				    spec->IO_size[ind].read.caller[6] ?
+					    spec->IO_size[ind].read.caller[6] :
+					    '9',
+				    spec->IO_size[ind].read.tdiff[6].tv_sec,
+				    spec->IO_size[ind].read.tdiff[6].tv_nsec,
+				    spec->IO_size[ind].read.caller[7] ?
+					    spec->IO_size[ind].read.caller[7] :
+					    '9',
+				    spec->IO_size[ind].read.tdiff[7].tv_sec,
+				    spec->IO_size[ind].read.tdiff[7].tv_nsec,
+				    spec->IO_size[ind].read.caller[8] ?
+					    spec->IO_size[ind].read.caller[8] :
+					    '9',
+				    spec->IO_size[ind].read.tdiff[8].tv_sec,
+				    spec->IO_size[ind].read.tdiff[8].tv_nsec
 				);
 				rc = istgt_uctl_writeline(uctl);
 				if (rc != UCTL_CMD_OK) {
@@ -2395,25 +2540,87 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 			}
 		}
 		for (ind = 0; ind < 10; ind++) {
-			if (spec->IO_size[ind].cmp_n_write.total_time.tv_sec != 0 || spec->IO_size[ind].cmp_n_write.total_time.tv_nsec != 0) {
-				istgt_uctl_snprintf(uctl, "%s CMP_n_WR |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].cmp_n_write.lba, spec->IO_size[ind].cmp_n_write.lblen,
-					spec->IO_size[ind].cmp_n_write.total_time.tv_sec, spec->IO_size[ind].cmp_n_write.total_time.tv_nsec,
-					spec->IO_size[ind].cmp_n_write.caller[1] ? spec->IO_size[ind].cmp_n_write.caller[1] : '9',
-					spec->IO_size[ind].cmp_n_write.tdiff[1].tv_sec, spec->IO_size[ind].cmp_n_write.tdiff[1].tv_nsec,
-					spec->IO_size[ind].cmp_n_write.caller[2] ? spec->IO_size[ind].cmp_n_write.caller[2] : '9',
-					spec->IO_size[ind].cmp_n_write.tdiff[2].tv_sec, spec->IO_size[ind].cmp_n_write.tdiff[2].tv_nsec,
-					spec->IO_size[ind].cmp_n_write.caller[3] ? spec->IO_size[ind].cmp_n_write.caller[3] : '9',
-					spec->IO_size[ind].cmp_n_write.tdiff[3].tv_sec, spec->IO_size[ind].cmp_n_write.tdiff[3].tv_nsec,
-					spec->IO_size[ind].cmp_n_write.caller[4] ? spec->IO_size[ind].cmp_n_write.caller[4] : '9',
-					spec->IO_size[ind].cmp_n_write.tdiff[4].tv_sec, spec->IO_size[ind].cmp_n_write.tdiff[4].tv_nsec,
-					spec->IO_size[ind].cmp_n_write.caller[5] ? spec->IO_size[ind].cmp_n_write.caller[5] : '9',
-					spec->IO_size[ind].cmp_n_write.tdiff[5].tv_sec, spec->IO_size[ind].cmp_n_write.tdiff[5].tv_nsec,
-					spec->IO_size[ind].cmp_n_write.caller[6] ? spec->IO_size[ind].cmp_n_write.caller[6] : '9',
-					spec->IO_size[ind].cmp_n_write.tdiff[6].tv_sec, spec->IO_size[ind].cmp_n_write.tdiff[6].tv_nsec,
-					spec->IO_size[ind].cmp_n_write.caller[7] ? spec->IO_size[ind].cmp_n_write.caller[7] : '9',
-					spec->IO_size[ind].cmp_n_write.tdiff[7].tv_sec, spec->IO_size[ind].cmp_n_write.tdiff[7].tv_nsec,
-					spec->IO_size[ind].cmp_n_write.caller[8] ? spec->IO_size[ind].cmp_n_write.caller[8] : '9',
-					spec->IO_size[ind].cmp_n_write.tdiff[8].tv_sec, spec->IO_size[ind].cmp_n_write.tdiff[8].tv_nsec
+			if (spec->IO_size[ind]
+				    .cmp_n_write.total_time.tv_sec != 0 ||
+			    spec->IO_size[ind].cmp_n_write.total_time.tv_nsec
+				    != 0) {
+				istgt_uctl_snprintf(uctl,
+				    "%s CMP_n_WR |%10lu + %4lu| %ld.%9.9ld"
+				    " [%c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld]\n",
+				    uctl->cmd,
+				    spec->IO_size[ind].cmp_n_write.lba,
+				    spec->IO_size[ind].cmp_n_write.lblen,
+				    spec->IO_size[ind]
+					    .cmp_n_write.total_time.tv_sec,
+				    spec->IO_size[ind]
+					    .cmp_n_write.total_time.tv_nsec,
+				    spec->IO_size[ind].cmp_n_write.caller[1] ?
+					    spec->IO_size[ind]
+						    .cmp_n_write.caller[1] :
+					    '9',
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[1].tv_sec,
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[1].tv_nsec,
+				    spec->IO_size[ind].cmp_n_write.caller[2] ?
+					    spec->IO_size[ind]
+						    .cmp_n_write.caller[2] :
+					    '9',
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[2].tv_sec,
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[2].tv_nsec,
+				    spec->IO_size[ind].cmp_n_write.caller[3] ?
+					    spec->IO_size[ind]
+						    .cmp_n_write.caller[3] :
+					    '9',
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[3].tv_sec,
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[3].tv_nsec,
+				    spec->IO_size[ind].cmp_n_write.caller[4] ?
+					    spec->IO_size[ind]
+						    .cmp_n_write.caller[4] :
+					    '9',
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[4].tv_sec,
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[4].tv_nsec,
+				    spec->IO_size[ind].cmp_n_write.caller[5] ?
+					    spec->IO_size[ind]
+						    .cmp_n_write.caller[5] :
+					    '9',
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[5].tv_sec,
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[5].tv_nsec,
+				    spec->IO_size[ind].cmp_n_write.caller[6] ?
+					    spec->IO_size[ind]
+						    .cmp_n_write.caller[6] :
+					    '9',
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[6].tv_sec,
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[6].tv_nsec,
+				    spec->IO_size[ind].cmp_n_write.caller[7] ?
+					    spec->IO_size[ind]
+						    .cmp_n_write.caller[7] :
+					    '9',
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[7].tv_sec,
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[7].tv_nsec,
+				    spec->IO_size[ind].cmp_n_write.caller[8] ?
+					    spec->IO_size[ind]
+						    .cmp_n_write.caller[8] :
+					    '9',
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[8].tv_sec,
+				    spec->IO_size[ind]
+					    .cmp_n_write.tdiff[8].tv_nsec
 				);
 				rc = istgt_uctl_writeline(uctl);
 				if (rc != UCTL_CMD_OK) {
@@ -2422,25 +2629,58 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 			}
 		}
 		for (ind = 0; ind < 10; ind++) {
-			if (spec->IO_size[ind].unmp.total_time.tv_sec != 0 || spec->IO_size[ind].unmp.total_time.tv_nsec != 0) {
-				istgt_uctl_snprintf(uctl, "%s UNMP     |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].unmp.lba, spec->IO_size[ind].unmp.lblen,
-					spec->IO_size[ind].unmp.total_time.tv_sec, spec->IO_size[ind].unmp.total_time.tv_nsec,
-					spec->IO_size[ind].unmp.caller[1] ? spec->IO_size[ind].unmp.caller[1] : '9',
-					spec->IO_size[ind].unmp.tdiff[1].tv_sec, spec->IO_size[ind].unmp.tdiff[1].tv_nsec,
-					spec->IO_size[ind].unmp.caller[2] ? spec->IO_size[ind].unmp.caller[2] : '9',
-					spec->IO_size[ind].unmp.tdiff[2].tv_sec, spec->IO_size[ind].unmp.tdiff[2].tv_nsec,
-					spec->IO_size[ind].unmp.caller[3] ? spec->IO_size[ind].unmp.caller[3] : '9',
-					spec->IO_size[ind].unmp.tdiff[3].tv_sec, spec->IO_size[ind].unmp.tdiff[3].tv_nsec,
-					spec->IO_size[ind].unmp.caller[4] ? spec->IO_size[ind].unmp.caller[4] : '9',
-					spec->IO_size[ind].unmp.tdiff[4].tv_sec, spec->IO_size[ind].unmp.tdiff[4].tv_nsec,
-					spec->IO_size[ind].unmp.caller[5] ? spec->IO_size[ind].unmp.caller[5] : '9',
-					spec->IO_size[ind].unmp.tdiff[5].tv_sec, spec->IO_size[ind].unmp.tdiff[5].tv_nsec,
-					spec->IO_size[ind].unmp.caller[6] ? spec->IO_size[ind].unmp.caller[6] : '9',
-					spec->IO_size[ind].unmp.tdiff[6].tv_sec, spec->IO_size[ind].unmp.tdiff[6].tv_nsec,
-					spec->IO_size[ind].unmp.caller[7] ? spec->IO_size[ind].unmp.caller[7] : '9',
-					spec->IO_size[ind].unmp.tdiff[7].tv_sec, spec->IO_size[ind].unmp.tdiff[7].tv_nsec,
-					spec->IO_size[ind].unmp.caller[8] ? spec->IO_size[ind].unmp.caller[8] : '9',
-					spec->IO_size[ind].unmp.tdiff[8].tv_sec, spec->IO_size[ind].unmp.tdiff[8].tv_nsec
+			if (spec->IO_size[ind].unmp.total_time.tv_sec != 0 ||
+			    spec->IO_size[ind].unmp.total_time.tv_nsec != 0) {
+				istgt_uctl_snprintf(uctl,
+				    "%s UNMP     |%10lu + %4lu| %ld.%9.9ld"
+				    " [%c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld]\n",
+				    uctl->cmd, spec->IO_size[ind].unmp.lba,
+				    spec->IO_size[ind].unmp.lblen,
+				    spec->IO_size[ind].unmp.total_time.tv_sec,
+				    spec->IO_size[ind].unmp.total_time.tv_nsec,
+				    spec->IO_size[ind].unmp.caller[1] ?
+					    spec->IO_size[ind].unmp.caller[1] :
+					    '9',
+				    spec->IO_size[ind].unmp.tdiff[1].tv_sec,
+				    spec->IO_size[ind].unmp.tdiff[1].tv_nsec,
+				    spec->IO_size[ind].unmp.caller[2] ?
+					    spec->IO_size[ind].unmp.caller[2] :
+					    '9',
+				    spec->IO_size[ind].unmp.tdiff[2].tv_sec,
+				    spec->IO_size[ind].unmp.tdiff[2].tv_nsec,
+				    spec->IO_size[ind].unmp.caller[3] ?
+					    spec->IO_size[ind].unmp.caller[3] :
+					    '9',
+				    spec->IO_size[ind].unmp.tdiff[3].tv_sec,
+				    spec->IO_size[ind].unmp.tdiff[3].tv_nsec,
+				    spec->IO_size[ind].unmp.caller[4] ?
+					    spec->IO_size[ind].unmp.caller[4] :
+					    '9',
+				    spec->IO_size[ind].unmp.tdiff[4].tv_sec,
+				    spec->IO_size[ind].unmp.tdiff[4].tv_nsec,
+				    spec->IO_size[ind].unmp.caller[5] ?
+					    spec->IO_size[ind].unmp.caller[5] :
+					    '9',
+				    spec->IO_size[ind].unmp.tdiff[5].tv_sec,
+				    spec->IO_size[ind].unmp.tdiff[5].tv_nsec,
+				    spec->IO_size[ind].unmp.caller[6] ?
+					    spec->IO_size[ind].unmp.caller[6] :
+					    '9',
+				    spec->IO_size[ind].unmp.tdiff[6].tv_sec,
+				    spec->IO_size[ind].unmp.tdiff[6].tv_nsec,
+				    spec->IO_size[ind].unmp.caller[7] ?
+					    spec->IO_size[ind].unmp.caller[7] :
+					    '9',
+				    spec->IO_size[ind].unmp.tdiff[7].tv_sec,
+				    spec->IO_size[ind].unmp.tdiff[7].tv_nsec,
+				    spec->IO_size[ind].unmp.caller[8] ?
+					    spec->IO_size[ind].unmp.caller[8] :
+					    '9',
+				    spec->IO_size[ind].unmp.tdiff[8].tv_sec,
+				    spec->IO_size[ind].unmp.tdiff[8].tv_nsec
 				);
 				rc = istgt_uctl_writeline(uctl);
 				if (rc != UCTL_CMD_OK) {
@@ -2449,25 +2689,87 @@ istgt_uctl_cmd_maxtime(UCTL_Ptr uctl)
 			}
 		}
 		for (ind = 0; ind < 10; ind++) {
-			if (spec->IO_size[ind].write_same.total_time.tv_sec != 0 || spec->IO_size[ind].write_same.total_time.tv_nsec != 0) {
-				istgt_uctl_snprintf(uctl, "%s WR_SAME  |%10lu + %4lu| %ld.%9.9ld [%c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld %c:%ld.%9.9ld]\n", uctl->cmd, spec->IO_size[ind].write_same.lba, spec->IO_size[ind].write_same.lblen,
-					spec->IO_size[ind].write_same.total_time.tv_sec, spec->IO_size[ind].write_same.total_time.tv_nsec,
-					spec->IO_size[ind].write_same.caller[1] ? spec->IO_size[ind].write_same.caller[1] : '9',
-					spec->IO_size[ind].write_same.tdiff[1].tv_sec, spec->IO_size[ind].write_same.tdiff[1].tv_nsec,
-					spec->IO_size[ind].write_same.caller[2] ? spec->IO_size[ind].write_same.caller[2] : '9',
-					spec->IO_size[ind].write_same.tdiff[2].tv_sec, spec->IO_size[ind].write_same.tdiff[2].tv_nsec,
-					spec->IO_size[ind].write_same.caller[3] ? spec->IO_size[ind].write_same.caller[3] : '9',
-					spec->IO_size[ind].write_same.tdiff[3].tv_sec, spec->IO_size[ind].write_same.tdiff[3].tv_nsec,
-					spec->IO_size[ind].write_same.caller[4] ? spec->IO_size[ind].write_same.caller[4] : '9',
-					spec->IO_size[ind].write_same.tdiff[4].tv_sec, spec->IO_size[ind].write_same.tdiff[4].tv_nsec,
-					spec->IO_size[ind].write_same.caller[5] ? spec->IO_size[ind].write_same.caller[5] : '9',
-					spec->IO_size[ind].write_same.tdiff[5].tv_sec, spec->IO_size[ind].write_same.tdiff[5].tv_nsec,
-					spec->IO_size[ind].write_same.caller[6] ? spec->IO_size[ind].write_same.caller[6] : '9',
-					spec->IO_size[ind].write_same.tdiff[6].tv_sec, spec->IO_size[ind].write_same.tdiff[6].tv_nsec,
-					spec->IO_size[ind].write_same.caller[7] ? spec->IO_size[ind].write_same.caller[7] : '9',
-					spec->IO_size[ind].write_same.tdiff[7].tv_sec, spec->IO_size[ind].write_same.tdiff[7].tv_nsec,
-					spec->IO_size[ind].write_same.caller[8] ? spec->IO_size[ind].write_same.caller[8] : '9',
-					spec->IO_size[ind].write_same.tdiff[8].tv_sec, spec->IO_size[ind].write_same.tdiff[8].tv_nsec
+			if (spec->IO_size[ind]
+				    .write_same.total_time.tv_sec != 0 ||
+			    spec->IO_size[ind]
+				    .write_same.total_time.tv_nsec != 0) {
+				istgt_uctl_snprintf(uctl,
+				    "%s WR_SAME  |%10lu + %4lu| %ld.%9.9ld"
+				    " [%c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld"
+				    " %c:%ld.%9.9ld %c:%ld.%9.9ld]\n",
+				    uctl->cmd,
+				    spec->IO_size[ind].write_same.lba,
+				    spec->IO_size[ind].write_same.lblen,
+				    spec->IO_size[ind]
+					    .write_same.total_time.tv_sec,
+				    spec->IO_size[ind]
+					    .write_same.total_time.tv_nsec,
+				    spec->IO_size[ind].write_same.caller[1] ?
+					    spec->IO_size[ind]
+						    .write_same.caller[1] :
+					    '9',
+				    spec->IO_size[ind]
+					    .write_same.tdiff[1].tv_sec,
+				    spec->IO_size[ind]
+					    .write_same.tdiff[1].tv_nsec,
+				    spec->IO_size[ind].write_same.caller[2] ?
+					    spec->IO_size[ind]
+						    .write_same.caller[2] :
+					    '9',
+				    spec->IO_size[ind]
+					    .write_same.tdiff[2].tv_sec,
+				    spec->IO_size[ind]
+					    .write_same.tdiff[2].tv_nsec,
+				    spec->IO_size[ind].write_same.caller[3] ?
+					    spec->IO_size[ind]
+						    .write_same.caller[3] :
+					    '9',
+				    spec->IO_size[ind]
+					    .write_same.tdiff[3].tv_sec,
+				    spec->IO_size[ind]
+					    .write_same.tdiff[3].tv_nsec,
+				    spec->IO_size[ind].write_same.caller[4] ?
+					    spec->IO_size[ind]
+						    .write_same.caller[4] :
+					    '9',
+				    spec->IO_size[ind]
+					    .write_same.tdiff[4].tv_sec,
+				    spec->IO_size[ind]
+					    .write_same.tdiff[4].tv_nsec,
+				    spec->IO_size[ind].write_same.caller[5] ?
+					    spec->IO_size[ind]
+						    .write_same.caller[5] :
+					    '9',
+				    spec->IO_size[ind]
+					    .write_same.tdiff[5].tv_sec,
+				    spec->IO_size[ind]
+					    .write_same.tdiff[5].tv_nsec,
+				    spec->IO_size[ind].write_same.caller[6] ?
+					    spec->IO_size[ind]
+						    .write_same.caller[6] :
+					    '9',
+				    spec->IO_size[ind]
+					    .write_same.tdiff[6].tv_sec,
+				    spec->IO_size[ind]
+					    .write_same.tdiff[6].tv_nsec,
+				    spec->IO_size[ind].write_same.caller[7] ?
+					    spec->IO_size[ind]
+						    .write_same.caller[7] :
+					    '9',
+				    spec->IO_size[ind]
+					    .write_same.tdiff[7].tv_sec,
+				    spec->IO_size[ind]
+					    .write_same.tdiff[7].tv_nsec,
+				    spec->IO_size[ind].write_same.caller[8] ?
+					    spec->IO_size[ind]
+						    .write_same.caller[8] :
+					    '9',
+				    spec->IO_size[ind]
+					    .write_same.tdiff[8].tv_sec,
+				    spec->IO_size[ind]
+					    .write_same.tdiff[8].tv_nsec
 				);
 				rc = istgt_uctl_writeline(uctl);
 				if (rc != UCTL_CMD_OK) {
@@ -2537,10 +2839,12 @@ istgt_uctl_cmd_dump(UCTL_Ptr uctl)
 		MTX_LOCK(&lu->mutex);
 		/* limit host string to 2048 characters */
 		for (j = 0; j < lu->maxmap && rem; j++) {
-			pgp = istgt_lu_find_portalgroup(uctl->istgt, lu->map[j].pg_tag);
+			pgp = istgt_lu_find_portalgroup(uctl->istgt,
+			    lu->map[j].pg_tag);
 			if (pgp != NULL) {
 				for (x = 0; x < pgp->nportals && rem; x++) {
-					ln = snprintf(bp, rem, " IP%d:%s  ", x+1, pgp->portals[x]->host);
+					ln = snprintf(bp, rem, " IP%d:%s  ",
+					    x+1, pgp->portals[x]->host);
 					if (ln < 0)
 						ln = 0;
 					else if (ln > rem)
@@ -2564,26 +2868,40 @@ istgt_uctl_cmd_dump(UCTL_Ptr uctl)
 			}
 		} while (1);
 		switch (count) {
-			case 0: snprintf(c_size, 100, "%lu.%lu%c", temp_s, temp_s2, 'B'); break;
-			case 1: snprintf(c_size, 100, "%lu.%lu%c", temp_s, temp_s2, 'K'); break;
-			case 2: snprintf(c_size, 100, "%lu.%lu%c", temp_s, temp_s2, 'M'); break;
-			case 3: snprintf(c_size, 100, "%lu.%lu%c", temp_s, temp_s2, 'G'); break;
-			case 4: snprintf(c_size, 100, "%lu.%lu%c", temp_s, temp_s2, 'T'); break;
-			case 5: snprintf(c_size, 100, "%lu.%lu%c", temp_s, temp_s2, 'P'); break;
-			case 6: snprintf(c_size, 100, "%lu.%lu%c", temp_s, temp_s2, 'E'); break;
-			case 7: snprintf(c_size, 100, "%lu.%lu%c", temp_s, temp_s2, 'Z'); break;
+			case 0: snprintf(c_size, 100, "%lu.%lu%c",
+			    temp_s, temp_s2, 'B'); break;
+			case 1: snprintf(c_size, 100, "%lu.%lu%c",
+			    temp_s, temp_s2, 'K'); break;
+			case 2: snprintf(c_size, 100, "%lu.%lu%c",
+			    temp_s, temp_s2, 'M'); break;
+			case 3: snprintf(c_size, 100, "%lu.%lu%c",
+			    temp_s, temp_s2, 'G'); break;
+			case 4: snprintf(c_size, 100, "%lu.%lu%c",
+			    temp_s, temp_s2, 'T'); break;
+			case 5: snprintf(c_size, 100, "%lu.%lu%c",
+			    temp_s, temp_s2, 'P'); break;
+			case 6: snprintf(c_size, 100, "%lu.%lu%c",
+			    temp_s, temp_s2, 'E'); break;
+			case 7: snprintf(c_size, 100, "%lu.%lu%c",
+			    temp_s, temp_s2, 'Z'); break;
 		}
 		if (detail == 1)
-			istgt_uctl_snprintf(uctl, "%s LUN LU%d %s Luworkers:%d Qdepth:%d Size:%s Blocklength:%lu PhysRecordLength:%d Unmap:%s Wzero:%s ATS:%s XCOPY:%s %s CONNECTIONS:%d\n",
-					uctl->cmd, lu->num, lu->name, lu->luworkers, lu->queue_depth, c_size,
-					spec->blocklen, lu->recordsize,
-					(spec->unmap == 1) ? "Enabled":"Disabled",
-					(spec->wzero == 1) ? "Enabled":"Disabled",
-					(spec->ats == 1) ? "Enabled":"Disabled",
-					(spec->xcopy == 1) ? "Enabled":"Disabled",
-					temp, lu->conns);
+			istgt_uctl_snprintf(uctl,
+			    "%s LUN LU%d %s Luworkers:%d Qdepth:%d Size:%s"
+			    " Blocklength:%lu PhysRecordLength:%d Unmap:%s"
+			    " Wzero:%s ATS:%s XCOPY:%s %s CONNECTIONS:%d\n",
+			    uctl->cmd, lu->num, lu->name, lu->luworkers,
+			    lu->queue_depth, c_size,
+			    spec->blocklen, lu->recordsize,
+			    (spec->unmap == 1) ? "Enabled":"Disabled",
+			    (spec->wzero == 1) ? "Enabled":"Disabled",
+			    (spec->ats == 1) ? "Enabled":"Disabled",
+			    (spec->xcopy == 1) ? "Enabled":"Disabled",
+			    temp, lu->conns);
 		else
-			istgt_uctl_snprintf(uctl, "%s LUN LU%d %s %s CONNECTIONS:%d\n", uctl->cmd, lu->num, lu->name, temp, lu->conns);
+			istgt_uctl_snprintf(uctl,
+			    "%s LUN LU%d %s %s CONNECTIONS:%d\n",
+			    uctl->cmd, lu->num, lu->name, temp, lu->conns);
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
 			MTX_UNLOCK(&lu->mutex);
@@ -2609,7 +2927,9 @@ istgt_uctl_cmd_dump(UCTL_Ptr uctl)
 						continue;
 
 					for (t = 0; t < lu->maxmap; t++) {
-						pgp = istgt_lu_find_portalgroup(uctl->istgt, lu->map[t].pg_tag);
+						pgp = istgt_lu_find_portalgroup(
+						    uctl->istgt,
+						    lu->map[t].pg_tag);
 						if (pgp != NULL) {
 							for (x = 0; x < pgp->nportals; x++) {
 								if (strcmp(pgp->portals[x]->host, conn->target_addr) == 0) {
@@ -2619,12 +2939,14 @@ istgt_uctl_cmd_dump(UCTL_Ptr uctl)
 						}
 					}
 					istgt_uctl_snprintf(uctl, "%s CONN c#%d"
-					    " %"PRIx64"   %u     %u   IP%d   %s    %s\n",
+					    " %"PRIx64"   %u     %u"
+					    "   IP%d   %s    %s\n",
 					    uctl->cmd,
 					    conn->id,
 					    conn->sess->isid, conn->sess->tsih,
 					    conn->cid, x+1,
-					    conn->initiator_addr, conn->initiator_name);
+					    conn->initiator_addr,
+					    conn->initiator_name);
 					rc = istgt_uctl_writeline(uctl);
 					if (rc != UCTL_CMD_OK) {
 						MTX_UNLOCK(&sess->mutex);
@@ -2643,7 +2965,8 @@ istgt_uctl_cmd_dump(UCTL_Ptr uctl)
 	}
 	MTX_UNLOCK(&uctl->istgt->mutex);
 
-	istgt_uctl_snprintf(uctl, "%s TOTAL LOGICAL_UNITS:%d CONNECTIONS:%d\n", uctl->cmd, lu_num, ncount);
+	istgt_uctl_snprintf(uctl, "%s TOTAL LOGICAL_UNITS:%d CONNECTIONS:%d\n",
+	    uctl->cmd, lu_num, ncount);
 	rc = istgt_uctl_writeline(uctl);
 	if (rc != UCTL_CMD_OK) {
 		return (rc);
@@ -2694,7 +3017,8 @@ istgt_uctl_cmd_rsv(UCTL_Ptr uctl)
 			continue;
 		if (iqn != NULL && strcasecmp(iqn, lu->name) != 0)
 			continue;
-		(void) istgt_lu_disk_print_reservation(lu, 0); // CB has only lun 0
+		(void) istgt_lu_disk_print_reservation(
+		    lu, 0); // CB has only lun 0
 	}
 	MTX_UNLOCK(&uctl->istgt->mutex);
 
@@ -2764,7 +3088,9 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 			err = 1;
 	}
 	if (arg != NULL || err == 1) {
-		istgt_uctl_snprintf(uctl, "ERR invalid parameters. usage: 'QUE IQN <iqn_name>'  or  'QUE LU <lu_number>'\n");
+		istgt_uctl_snprintf(uctl,
+		    "ERR invalid parameters."
+		    " usage: 'QUE IQN <iqn_name>'  or  'QUE LU <lu_number>'\n");
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
 			return (rc);
@@ -2812,19 +3138,25 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 			spec->do_avg = 0;
 			wn = snprintf(bptr, brem, " Avgs:");
 			adjbuf()
-			if (((signed long)((signed long)(now.tv_nsec) - (signed long)(spec->avgs[0].tot_nsec))) < 0) {
-				spec->avgs[0].tot_sec  = now.tv_sec - spec->avgs[0].tot_sec - 1;
-				spec->avgs[0].tot_nsec = 1000000000 + now.tv_nsec - spec->avgs[0].tot_nsec;
+			if (((signed long)((signed long)(now.tv_nsec) -
+			    (signed long)(spec->avgs[0].tot_nsec))) < 0) {
+				spec->avgs[0].tot_sec  =
+				    now.tv_sec - spec->avgs[0].tot_sec - 1;
+				spec->avgs[0].tot_nsec = 1000000000 +
+				    now.tv_nsec - spec->avgs[0].tot_nsec;
 			} else {
-				spec->avgs[0].tot_sec  = now.tv_sec - spec->avgs[0].tot_sec;
-				spec->avgs[0].tot_nsec = now.tv_nsec - spec->avgs[0].tot_nsec;
+				spec->avgs[0].tot_sec =
+				    now.tv_sec - spec->avgs[0].tot_sec;
+				spec->avgs[0].tot_nsec =
+				    now.tv_nsec - spec->avgs[0].tot_nsec;
 			}
 
 			for (j = 0; j < levels; j++)
 			{
 				wn = snprintf(bptr, brem, " %d:%d %ld.%9.9ld",
-					j, spec->avgs[j].count, spec->avgs[j].tot_sec,
-					spec->avgs[j].tot_nsec);
+				    j, spec->avgs[j].count,
+				    spec->avgs[j].tot_sec,
+				    spec->avgs[j].tot_nsec);
 				adjbuf()
 			}
 			wn = snprintf(bptr, brem, " %d:%d",
@@ -2838,22 +3170,26 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 		bq = spec->blocked_queue.num;
 		inf = spec->ludsk_ref;
 #if 0
-		while ((tptr = (ISTGT_LU_TASK_Ptr)istgt_queue_walk(&spec->cmd_queue, &cookie)) != NULL) {
+		while ((tptr = (ISTGT_LU_TASK_Ptr)
+		    istgt_queue_walk(&spec->cmd_queue, &cookie)) != NULL) {
 			tdiff(tptr->lu_cmd.times[0], now, r)
-			wn = snprintf(bptr, brem, " %d:%x 0x%x.%lu+%uT%ld.%9.9ld",
-						i++, tptr->lu_cmd.CmdSN, tptr->lu_cmd.cdb0,
-						tptr->lu_cmd.lba, tptr->lu_cmd.lblen,
-						r.tv_sec, r.tv_nsec);
+			wn = snprintf(bptr, brem,
+			    " %d:%x 0x%x.%lu+%uT%ld.%9.9ld",
+			    i++, tptr->lu_cmd.CmdSN, tptr->lu_cmd.cdb0,
+			    tptr->lu_cmd.lba, tptr->lu_cmd.lblen,
+			    r.tv_sec, r.tv_nsec);
 			adjbuf()
 		}
 		*bptr++ = ' '; *bptr++ = '-'; *bptr++ = ' '; brem -= 3;
 		cookie = NULL;
-		while ((tptr = (ISTGT_LU_TASK_Ptr)istgt_queue_walk(&spec->blocked_queue, &cookie)) != NULL) {
+		while ((tptr = (ISTGT_LU_TASK_Ptr)
+		    istgt_queue_walk(&spec->blocked_queue, &cookie)) != NULL) {
 			tdiff(tptr->lu_cmd.times[0], now, r)
-			wn = snprintf(bptr, brem, " %d:%x 0x%x.%lu+%uT%ld.%9.9ld",
-						i++, tptr->lu_cmd.CmdSN, tptr->lu_cmd.cdb0,
-						tptr->lu_cmd.lba, tptr->lu_cmd.lblen,
-						r.tv_sec, r.tv_nsec);
+			wn = snprintf(bptr, brem,
+			    " %d:%x 0x%x.%lu+%uT%ld.%9.9ld",
+			    i++, tptr->lu_cmd.CmdSN, tptr->lu_cmd.cdb0,
+			    tptr->lu_cmd.lba, tptr->lu_cmd.lblen,
+			    r.tv_sec, r.tv_nsec);
 			adjbuf()
 		}
 		*bptr++ = ' '; *bptr++ = '-'; *bptr++ = ' '; brem -= 3;
@@ -2864,13 +3200,15 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 		for (i = 0; i < spec->luworkers; i++) {
 			MTX_LOCK(&spec->luworker_mutex[i]);
 			if (spec->inflight_io[i] != NULL) {
-				tdiff(spec->inflight_io[i]->lu_cmd.times[0], now, r)
-				wn = snprintf(bptr, brem, " %d:%x 0x%x.%lu+%uT%ld.%9.9ld",
-							i, spec->inflight_io[i]->lu_cmd.CmdSN,
-							spec->inflight_io[i]->lu_cmd.cdb0,
-							spec->inflight_io[i]->lu_cmd.lba,
-							spec->inflight_io[i]->lu_cmd.lblen,
-							r.tv_sec, r.tv_nsec);
+				tdiff(spec->inflight_io[i]->lu_cmd.times[0],
+				    now, r)
+				wn = snprintf(bptr, brem,
+				    " %d:%x 0x%x.%lu+%uT%ld.%9.9ld",
+				    i, spec->inflight_io[i]->lu_cmd.CmdSN,
+				    spec->inflight_io[i]->lu_cmd.cdb0,
+				    spec->inflight_io[i]->lu_cmd.lba,
+				    spec->inflight_io[i]->lu_cmd.lblen,
+				    r.tv_sec, r.tv_nsec);
 				adjbuf()
 			}
 			MTX_UNLOCK(&spec->luworker_mutex[i]);
@@ -2881,13 +3219,15 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 		MTX_LOCK(&spec->wait_lu_task_mutex);
 		for (i = 0; i < ISTGT_MAX_NUM_LUWORKERS; i++) {
 			if (spec->wait_lu_task[i] != NULL) {
-				tdiff(spec->wait_lu_task[i]->lu_cmd.times[0], now, r)
-				wn = snprintf(bptr, brem, " %d:%x 0x%x.%lu+%uT%ld.%9.9ld",
-							i, spec->wait_lu_task[i]->lu_cmd.CmdSN,
-							spec->wait_lu_task[i]->lu_cmd.cdb0,
-							spec->wait_lu_task[i]->lu_cmd.lba,
-							spec->wait_lu_task[i]->lu_cmd.lblen,
-							r.tv_sec, r.tv_nsec);
+				tdiff(spec->wait_lu_task[i]->lu_cmd.times[0],
+				    now, r)
+				wn = snprintf(bptr, brem,
+				    " %d:%x 0x%x.%lu+%uT%ld.%9.9ld",
+				    i, spec->wait_lu_task[i]->lu_cmd.CmdSN,
+				    spec->wait_lu_task[i]->lu_cmd.cdb0,
+				    spec->wait_lu_task[i]->lu_cmd.lba,
+				    spec->wait_lu_task[i]->lu_cmd.lblen,
+				    r.tv_sec, r.tv_nsec);
 				adjbuf()
 			}
 		}
@@ -2897,18 +3237,26 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 		unlocked = 1;
 
 		ISTGT_TRACELOG(ISTGT_TRACE_CMD,
-				"LU%d:QUE %s %s Q[%d %d %d %d] q:%d thr:%d/%d [sz:%lu, %lu blks of %lu bytes, phy:%u %s%s] er_cnt:%d\n",
-				lu->num, lu->name ? lu->name : "-", (spec->fd != -1) ? "on" : "off", cq, bq, inf, inflight,
-				spec->queue_depth, spec->luworkers, spec->luworkersActive,
-				spec->size, spec->blockcnt, spec->blocklen, spec->rshift,
-				spec->readcache ?  "" : "RCD", spec->writecache ? " WCE" : "", spec->error_count);
+		    "LU%d:QUE %s %s Q[%d %d %d %d] q:%d thr:%d/%d [sz:%lu,"
+		    " %lu blks of %lu bytes, phy:%u %s%s] er_cnt:%d\n",
+		    lu->num, lu->name ? lu->name : "-",
+		    (spec->fd != -1) ? "on" : "off", cq, bq, inf, inflight,
+		    spec->queue_depth, spec->luworkers, spec->luworkersActive,
+		    spec->size, spec->blockcnt, spec->blocklen, spec->rshift,
+		    spec->readcache ?  "" : "RCD",
+		    spec->writecache ? " WCE" : "",
+		    spec->error_count);
 
 		istgt_uctl_snprintf(uctl,
-				"%s LU%d:%s %s Q[%d %d %d %d] q:%d thr:%d/%d [sz:%lu, %lu blks of %lu bytes, phy:%u %s%s] er_cnt:%d\n",
-				uctl->cmd, lu->num, lu->name ? lu->name : "-", (spec->fd != -1) ? "on" : "off", cq, bq, inf, inflight,
-				spec->queue_depth, spec->luworkers, spec->luworkersActive,
-				spec->size, spec->blockcnt, spec->blocklen, spec->rshift,
-				spec->readcache ?  "" : "RCD", spec->writecache ? " WCE" : "", spec->error_count);
+		    "%s LU%d:%s %s Q[%d %d %d %d] q:%d thr:%d/%d [sz:%lu,"
+		    " %lu blks of %lu bytes, phy:%u %s%s] er_cnt:%d\n",
+		    uctl->cmd, lu->num, lu->name ? lu->name : "-",
+		    (spec->fd != -1) ? "on" : "off", cq, bq, inf, inflight,
+		    spec->queue_depth, spec->luworkers, spec->luworkersActive,
+		    spec->size, spec->blockcnt, spec->blocklen, spec->rshift,
+		    spec->readcache ?  "" : "RCD",
+		    spec->writecache ? " WCE" : "",
+		    spec->error_count);
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK)
 			return (rc);
@@ -2922,10 +3270,10 @@ istgt_uctl_cmd_que(UCTL_Ptr uctl)
 				chunk = 1024;
 			else
 				chunk = toprint;
-			ISTGT_TRACELOG(ISTGT_TRACE_CMD,
-					"LU%d:QUE%d [%.*s]\n", lu->num, i, chunk, bptr);
-			istgt_uctl_snprintf(uctl,
-					"%s LU%d:%d [%.*s]\n", uctl->cmd, lu->num, i, chunk, bptr);
+			ISTGT_TRACELOG(ISTGT_TRACE_CMD, "LU%d:QUE%d [%.*s]\n",
+			    lu->num, i, chunk, bptr);
+			istgt_uctl_snprintf(uctl, "%s LU%d:%d [%.*s]\n",
+			    uctl->cmd, lu->num, i, chunk, bptr);
 			rc = istgt_uctl_writeline(uctl);
 			if (rc != UCTL_CMD_OK)
 				return (rc);
@@ -2975,8 +3323,12 @@ istgt_uctl_cmd_iostats(UCTL_Ptr uctl)
 	uint64_t usedlogicalblocks;
 	/* instantiate json_object from json-c library. */
 	struct json_object *jobj;
-	/* these are utility variables that will be freed at the end of the function. */
-	char *writes, *reads, *totalreadbytes, *totalwritebytes, *size, *usedblocks, *sectorsize;
+	/*
+	 * these are utility variables that will be freed
+	 * at the end of the function.
+	 */
+	char *writes, *reads, *totalreadbytes, *totalwritebytes, *size,
+	    *usedblocks, *sectorsize;
 	ISTGT_LU_DISK *spec;
 	MTX_LOCK(&specq_mtx);
 	TAILQ_FOREACH(spec, &spec_q, spec_next) {
@@ -2985,9 +3337,11 @@ istgt_uctl_cmd_iostats(UCTL_Ptr uctl)
 		json_object *jIQN = json_object_new_string(lu->name);
 		json_object_object_add(jobj, "iqn", jIQN);
 
-		length = snprintf(NULL, 0, "%"PRIu64, spec->writes);	/* get the length */
+		length = snprintf(NULL, 0,
+		    "%"PRIu64, spec->writes);	/* get the length */
 		writes = malloc(length + 1);
-		snprintf(writes, length + 1, "%"PRIu64, spec->writes);	/* uint64 to string */
+		snprintf(writes, length + 1,
+		    "%"PRIu64, spec->writes);	/* uint64 to string */
 
 		length = snprintf(NULL, 0, "%"PRIu64, spec->reads);
 		reads = malloc(length + 1);
@@ -2995,11 +3349,13 @@ istgt_uctl_cmd_iostats(UCTL_Ptr uctl)
 
 		length = snprintf(NULL, 0, "%"PRIu64, spec->readbytes);
 		totalreadbytes = malloc(length + 1);
-		snprintf(totalreadbytes, length + 1, "%"PRIu64, spec->readbytes);
+		snprintf(totalreadbytes, length + 1,
+		    "%"PRIu64, spec->readbytes);
 
 		length = snprintf(NULL, 0, "%"PRIu64, spec->writebytes);
 		totalwritebytes = malloc(length + 1);
-		snprintf(totalwritebytes, length + 1, "%"PRIu64, spec->writebytes);
+		snprintf(totalwritebytes, length + 1,
+		    "%"PRIu64, spec->writebytes);
 
 		length = snprintf(NULL, 0, "%"PRIu64, spec->size);
 		size = malloc(length + 1);
@@ -3014,23 +3370,31 @@ istgt_uctl_cmd_iostats(UCTL_Ptr uctl)
 		sectorsize = malloc(length + 1);
 		snprintf(sectorsize, length + 1, "%"PRIu64, spec->blocklen);
 
-		json_object *jreads = json_object_new_string(reads);	/* instantiate child object */
+		json_object *jreads = json_object_new_string(
+		    reads);	/* instantiate child object */
 		json_object *jwrites = json_object_new_string(writes);
-		json_object *jtotalreadbytes = json_object_new_string(totalreadbytes);
-		json_object *jtotalwritebytes = json_object_new_string(totalwritebytes);
+		json_object *jtotalreadbytes =
+		    json_object_new_string(totalreadbytes);
+		json_object *jtotalwritebytes =
+		    json_object_new_string(totalwritebytes);
 		json_object *jsize = json_object_new_string(size);
-		json_object *jusedlogicalblocks = json_object_new_string(usedblocks);
+		json_object *jusedlogicalblocks =
+		    json_object_new_string(usedblocks);
 		json_object *jsectorsize = json_object_new_string(sectorsize);
 
-		json_object_object_add(jobj, "WriteIOPS", jwrites);	/* add values to object field */
+		json_object_object_add(jobj, "WriteIOPS",
+		    jwrites);	/* add values to object field */
 		json_object_object_add(jobj, "ReadIOPS", jreads);
-		json_object_object_add(jobj, "TotalWriteBytes", jtotalwritebytes);
+		json_object_object_add(jobj, "TotalWriteBytes",
+		    jtotalwritebytes);
 		json_object_object_add(jobj, "TotalReadBytes", jtotalreadbytes);
 		json_object_object_add(jobj, "Size", jsize);
-		json_object_object_add(jobj, "UsedLogicalBlocks", jusedlogicalblocks);
+		json_object_object_add(jobj, "UsedLogicalBlocks",
+		    jusedlogicalblocks);
 		json_object_object_add(jobj, "SectorSize", jsectorsize);
 
-		istgt_uctl_snprintf(uctl, "%s  %s\n", uctl->cmd, json_object_to_json_string(jobj));
+		istgt_uctl_snprintf(uctl, "%s  %s\n",
+		    uctl->cmd, json_object_to_json_string(jobj));
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
 			// free the pointers
@@ -3041,8 +3405,8 @@ istgt_uctl_cmd_iostats(UCTL_Ptr uctl)
 			free(size);
 			free(usedblocks);
 			free(sectorsize);
-			/* freeing root json_object will free all the allocated memory
-			** associated with the json_object.
+			/* freeing root json_object will free all the allocated
+			** memory associated with the json_object.
 			*/
 			json_object_put(jobj);
 			return (rc);
@@ -3097,47 +3461,70 @@ istgt_uctl_cmd_stats(UCTL_Ptr uctl)
 	if (setzero == 1) {
 		for (i = 0; i < ISCSI_ARYSZ; ++i) {
 			ISCSIstat_rslt[i].pdu_read =
-				ISCSIstat_now[i].pdu_read >= ISCSIstat_last[i].pdu_read ?
-				ISCSIstat_now[i].pdu_read - ISCSIstat_last[i].pdu_read :
-				(0xffffffff - ISCSIstat_last[i].pdu_read) + ISCSIstat_now[i].pdu_read;
+			    ISCSIstat_now[i].pdu_read >=
+				    ISCSIstat_last[i].pdu_read ?
+			    ISCSIstat_now[i].pdu_read -
+				    ISCSIstat_last[i].pdu_read :
+			    (0xffffffff - ISCSIstat_last[i].pdu_read) +
+				    ISCSIstat_now[i].pdu_read;
 			ISCSIstat_rslt[i].pdu_sent =
-				ISCSIstat_now[i].pdu_sent >= ISCSIstat_last[i].pdu_sent ?
-				ISCSIstat_now[i].pdu_sent - ISCSIstat_last[i].pdu_sent :
-				(0xffffffff - ISCSIstat_last[i].pdu_sent) + ISCSIstat_now[i].pdu_sent;
-			if (ISCSIstat_rslt[i].pdu_read || ISCSIstat_rslt[i].pdu_sent) {
-				is_l[is_li].opcode =  ISCSIstat_now[i].opcode;
-				is_l[is_li].pdu_read =  ISCSIstat_rslt[i].pdu_read;
-				is_l[is_li++].pdu_sent =  ISCSIstat_rslt[i].pdu_sent;
+			    ISCSIstat_now[i].pdu_sent >=
+				    ISCSIstat_last[i].pdu_sent ?
+			    ISCSIstat_now[i].pdu_sent -
+				    ISCSIstat_last[i].pdu_sent :
+			    (0xffffffff - ISCSIstat_last[i].pdu_sent) +
+				    ISCSIstat_now[i].pdu_sent;
+			if (ISCSIstat_rslt[i].pdu_read ||
+			    ISCSIstat_rslt[i].pdu_sent) {
+				is_l[is_li].opcode = ISCSIstat_now[i].opcode;
+				is_l[is_li].pdu_read =
+				    ISCSIstat_rslt[i].pdu_read;
+				is_l[is_li++].pdu_sent =
+				    ISCSIstat_rslt[i].pdu_sent;
 			}
 		}
 		for (i = 0; i < SCSI_ARYSZ; ++i) {
 			SCSIstat_rslt[i].req_start =
-				SCSIstat_now[i].req_start >= SCSIstat_last[i].req_start ?
-				SCSIstat_now[i].req_start - SCSIstat_last[i].req_start :
-				(0xffffffff - SCSIstat_last[i].req_start) + SCSIstat_now[i].req_start;
+			    SCSIstat_now[i].req_start >=
+				    SCSIstat_last[i].req_start ?
+			    SCSIstat_now[i].req_start -
+				    SCSIstat_last[i].req_start :
+			    (0xffffffff - SCSIstat_last[i].req_start) +
+				    SCSIstat_now[i].req_start;
 			SCSIstat_rslt[i].req_finish =
-				SCSIstat_now[i].req_finish >= SCSIstat_last[i].req_finish ?
-				SCSIstat_now[i].req_finish - SCSIstat_last[i].req_finish :
-				(0xffffffff - SCSIstat_last[i].req_finish) + SCSIstat_now[i].req_finish;
-			if (SCSIstat_rslt[i].req_start || SCSIstat_rslt[i].req_finish) {
+			    SCSIstat_now[i].req_finish >=
+				    SCSIstat_last[i].req_finish ?
+			    SCSIstat_now[i].req_finish -
+				    SCSIstat_last[i].req_finish :
+			    (0xffffffff - SCSIstat_last[i].req_finish) +
+				    SCSIstat_now[i].req_finish;
+			if (SCSIstat_rslt[i].req_start ||
+			    SCSIstat_rslt[i].req_finish) {
 				s_l[s_li].opcode = SCSIstat_now[i].opcode;
-				s_l[s_li].req_start = SCSIstat_rslt[i].req_start;
-				s_l[s_li++].req_finish = SCSIstat_rslt[i].req_finish;
+				s_l[s_li].req_start =
+				    SCSIstat_rslt[i].req_start;
+				s_l[s_li++].req_finish =
+				    SCSIstat_rslt[i].req_finish;
 			}
 		}
 	} else {
 		for (i = 0; i < ISCSI_ARYSZ; ++i) {
-			if (ISCSIstat_now[i].pdu_read || ISCSIstat_now[i].pdu_sent) {
-				is_l[is_li].opcode =  ISCSIstat_now[i].opcode;
-				is_l[is_li].pdu_read =  ISCSIstat_now[i].pdu_read;
-				is_l[is_li++].pdu_sent =  ISCSIstat_now[i].pdu_sent;
+			if (ISCSIstat_now[i].pdu_read ||
+			    ISCSIstat_now[i].pdu_sent) {
+				is_l[is_li].opcode = ISCSIstat_now[i].opcode;
+				is_l[is_li].pdu_read =
+				    ISCSIstat_now[i].pdu_read;
+				is_l[is_li++].pdu_sent =
+				    ISCSIstat_now[i].pdu_sent;
 			}
 		}
 		for (i = 0; i < SCSI_ARYSZ; ++i) {
-			if (SCSIstat_now[i].req_start || SCSIstat_now[i].req_finish) {
+			if (SCSIstat_now[i].req_start ||
+			    SCSIstat_now[i].req_finish) {
 				s_l[s_li].opcode = SCSIstat_now[i].opcode;
 				s_l[s_li].req_start = SCSIstat_now[i].req_start;
-				s_l[s_li++].req_finish = SCSIstat_now[i].req_finish;
+				s_l[s_li++].req_finish =
+				    SCSIstat_now[i].req_finish;
 			}
 		}
 	}
@@ -3159,74 +3546,73 @@ istgt_uctl_cmd_stats(UCTL_Ptr uctl)
 
 	if (is_li) {
 		istgt_uctl_snprintf(uctl, "%s  PDU:%d [%x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u]\n",
-				uctl->cmd, is_li,
-				is_l[0].opcode, is_l[0].pdu_read, is_l[0].pdu_sent,
-				is_l[1].opcode, is_l[1].pdu_read, is_l[1].pdu_sent,
-				is_l[2].opcode, is_l[2].pdu_read, is_l[2].pdu_sent,
-				is_l[3].opcode, is_l[3].pdu_read, is_l[3].pdu_sent,
-				is_l[4].opcode, is_l[4].pdu_read, is_l[4].pdu_sent,
-				is_l[5].opcode, is_l[5].pdu_read, is_l[5].pdu_sent,
-				is_l[6].opcode, is_l[6].pdu_read, is_l[6].pdu_sent,
-				is_l[7].opcode, is_l[7].pdu_read, is_l[7].pdu_sent,
-				is_l[8].opcode, is_l[8].pdu_read, is_l[8].pdu_sent,
-				is_l[9].opcode, is_l[9].pdu_read, is_l[9].pdu_sent);
+		    " %x:%u %u, %x:%u %u, %x:%u %u,"
+		    " %x:%u %u, %x:%u %u, %x:%u %u,"
+		    " %x:%u %u, %x:%u %u, %x:%u %u]\n",
+		    uctl->cmd, is_li,
+		    is_l[0].opcode, is_l[0].pdu_read, is_l[0].pdu_sent,
+		    is_l[1].opcode, is_l[1].pdu_read, is_l[1].pdu_sent,
+		    is_l[2].opcode, is_l[2].pdu_read, is_l[2].pdu_sent,
+		    is_l[3].opcode, is_l[3].pdu_read, is_l[3].pdu_sent,
+		    is_l[4].opcode, is_l[4].pdu_read, is_l[4].pdu_sent,
+		    is_l[5].opcode, is_l[5].pdu_read, is_l[5].pdu_sent,
+		    is_l[6].opcode, is_l[6].pdu_read, is_l[6].pdu_sent,
+		    is_l[7].opcode, is_l[7].pdu_read, is_l[7].pdu_sent,
+		    is_l[8].opcode, is_l[8].pdu_read, is_l[8].pdu_sent,
+		    is_l[9].opcode, is_l[9].pdu_read, is_l[9].pdu_sent);
 		rc = istgt_uctl_writeline(uctl);
 
-		ISTGT_TRACELOG(ISTGT_TRACE_CMD,
-				"%s  PDU:%d [%x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u]\n",
-				uctl->cmd, is_li,
-				is_l[0].opcode, is_l[0].pdu_read, is_l[0].pdu_sent,
-				is_l[1].opcode, is_l[1].pdu_read, is_l[1].pdu_sent,
-				is_l[2].opcode, is_l[2].pdu_read, is_l[2].pdu_sent,
-				is_l[3].opcode, is_l[3].pdu_read, is_l[3].pdu_sent,
-				is_l[4].opcode, is_l[4].pdu_read, is_l[4].pdu_sent,
-				is_l[5].opcode, is_l[5].pdu_read, is_l[5].pdu_sent,
-				is_l[6].opcode, is_l[6].pdu_read, is_l[6].pdu_sent,
-				is_l[7].opcode, is_l[7].pdu_read, is_l[7].pdu_sent,
-				is_l[8].opcode, is_l[8].pdu_read, is_l[8].pdu_sent,
-				is_l[9].opcode, is_l[9].pdu_read, is_l[9].pdu_sent);
+		ISTGT_TRACELOG(ISTGT_TRACE_CMD, "%s  PDU:%d [%x:%u %u,"
+		    " %x:%u %u, %x:%u %u, %x:%u %u,"
+		    " %x:%u %u, %x:%u %u, %x:%u %u,"
+		    " %x:%u %u, %x:%u %u, %x:%u %u]\n",
+		    uctl->cmd, is_li,
+		    is_l[0].opcode, is_l[0].pdu_read, is_l[0].pdu_sent,
+		    is_l[1].opcode, is_l[1].pdu_read, is_l[1].pdu_sent,
+		    is_l[2].opcode, is_l[2].pdu_read, is_l[2].pdu_sent,
+		    is_l[3].opcode, is_l[3].pdu_read, is_l[3].pdu_sent,
+		    is_l[4].opcode, is_l[4].pdu_read, is_l[4].pdu_sent,
+		    is_l[5].opcode, is_l[5].pdu_read, is_l[5].pdu_sent,
+		    is_l[6].opcode, is_l[6].pdu_read, is_l[6].pdu_sent,
+		    is_l[7].opcode, is_l[7].pdu_read, is_l[7].pdu_sent,
+		    is_l[8].opcode, is_l[8].pdu_read, is_l[8].pdu_sent,
+		    is_l[9].opcode, is_l[9].pdu_read, is_l[9].pdu_sent);
 		if (rc != UCTL_CMD_OK)
 			return (rc);
 	}
 	if (s_li) {
 		istgt_uctl_snprintf(uctl, "%s SCSI:%d [%x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u]\n",
-				uctl->cmd, s_li,
-				s_l[0].opcode, s_l[0].req_start, s_l[0].req_finish,
-				s_l[1].opcode, s_l[1].req_start, s_l[1].req_finish,
-				s_l[2].opcode, s_l[2].req_start, s_l[2].req_finish,
-				s_l[3].opcode, s_l[3].req_start, s_l[3].req_finish,
-				s_l[4].opcode, s_l[4].req_start, s_l[4].req_finish,
-				s_l[5].opcode, s_l[5].req_start, s_l[5].req_finish,
-				s_l[6].opcode, s_l[6].req_start, s_l[6].req_finish,
-				s_l[7].opcode, s_l[7].req_start, s_l[7].req_finish,
-				s_l[8].opcode, s_l[8].req_start, s_l[8].req_finish,
-				s_l[9].opcode, s_l[9].req_start, s_l[9].req_finish);
+		    " %x:%u %u, %x:%u %u, %x:%u %u,"
+		    " %x:%u %u, %x:%u %u, %x:%u %u,"
+		    " %x:%u %u, %x:%u %u, %x:%u %u]\n",
+		    uctl->cmd, s_li,
+		    s_l[0].opcode, s_l[0].req_start, s_l[0].req_finish,
+		    s_l[1].opcode, s_l[1].req_start, s_l[1].req_finish,
+		    s_l[2].opcode, s_l[2].req_start, s_l[2].req_finish,
+		    s_l[3].opcode, s_l[3].req_start, s_l[3].req_finish,
+		    s_l[4].opcode, s_l[4].req_start, s_l[4].req_finish,
+		    s_l[5].opcode, s_l[5].req_start, s_l[5].req_finish,
+		    s_l[6].opcode, s_l[6].req_start, s_l[6].req_finish,
+		    s_l[7].opcode, s_l[7].req_start, s_l[7].req_finish,
+		    s_l[8].opcode, s_l[8].req_start, s_l[8].req_finish,
+		    s_l[9].opcode, s_l[9].req_start, s_l[9].req_finish);
 		rc = istgt_uctl_writeline(uctl);
 
 		ISTGT_TRACELOG(ISTGT_TRACE_CMD, "%s SCSI:%d [%x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u,"
-				" %x:%u %u, %x:%u %u, %x:%u %u]\n",
-				uctl->cmd, s_li,
-				s_l[0].opcode, s_l[0].req_start, s_l[0].req_finish,
-				s_l[1].opcode, s_l[1].req_start, s_l[1].req_finish,
-				s_l[2].opcode, s_l[2].req_start, s_l[2].req_finish,
-				s_l[3].opcode, s_l[3].req_start, s_l[3].req_finish,
-				s_l[4].opcode, s_l[4].req_start, s_l[4].req_finish,
-				s_l[5].opcode, s_l[5].req_start, s_l[5].req_finish,
-				s_l[6].opcode, s_l[6].req_start, s_l[6].req_finish,
-				s_l[7].opcode, s_l[7].req_start, s_l[7].req_finish,
-				s_l[8].opcode, s_l[8].req_start, s_l[8].req_finish,
-				s_l[9].opcode, s_l[9].req_start, s_l[9].req_finish);
+		    " %x:%u %u, %x:%u %u, %x:%u %u,"
+		    " %x:%u %u, %x:%u %u, %x:%u %u,"
+		    " %x:%u %u, %x:%u %u, %x:%u %u]\n",
+		    uctl->cmd, s_li,
+		    s_l[0].opcode, s_l[0].req_start, s_l[0].req_finish,
+		    s_l[1].opcode, s_l[1].req_start, s_l[1].req_finish,
+		    s_l[2].opcode, s_l[2].req_start, s_l[2].req_finish,
+		    s_l[3].opcode, s_l[3].req_start, s_l[3].req_finish,
+		    s_l[4].opcode, s_l[4].req_start, s_l[4].req_finish,
+		    s_l[5].opcode, s_l[5].req_start, s_l[5].req_finish,
+		    s_l[6].opcode, s_l[6].req_start, s_l[6].req_finish,
+		    s_l[7].opcode, s_l[7].req_start, s_l[7].req_finish,
+		    s_l[8].opcode, s_l[8].req_start, s_l[8].req_finish,
+		    s_l[9].opcode, s_l[9].req_start, s_l[9].req_finish);
 		if (rc != UCTL_CMD_OK)
 			return (rc);
 	}
@@ -3316,7 +3702,8 @@ istgt_uctl_cmd_execute(UCTL_Ptr uctl)
 		}
 	}
 	if (func == NULL) {
-		ISTGT_TRACELOG(ISTGT_TRACE_NET, "uctl_cmd:%d ERR unknown command\n", i);
+		ISTGT_TRACELOG(ISTGT_TRACE_NET,
+		    "uctl_cmd:%d ERR unknown command\n", i);
 		istgt_uctl_snprintf(uctl, "ERR unknown command\n");
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
@@ -3329,7 +3716,8 @@ istgt_uctl_cmd_execute(UCTL_Ptr uctl)
 	if (!replication_initialized) {
 		ISTGT_TRACELOG(ISTGT_TRACE_DEBUG, "uctl_cmd:%d ERR replication"
 		    " not initialized\n", i);
-		istgt_uctl_snprintf(uctl, "ERR replication module not initialized\n");
+		istgt_uctl_snprintf(uctl,
+		    "ERR replication module not initialized\n");
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
 			return (UCTL_CMD_DISCON);
@@ -3339,7 +3727,8 @@ istgt_uctl_cmd_execute(UCTL_Ptr uctl)
 #endif
 
 	if (uctl->no_auth && (strcasecmp(cmd, "AUTH") == 0)) {
-		ISTGT_TRACELOG(ISTGT_TRACE_NET, "uctl_cmd:%d ERR auth not requried\n", i);
+		ISTGT_TRACELOG(ISTGT_TRACE_NET,
+		    "uctl_cmd:%d ERR auth not requried\n", i);
 		istgt_uctl_snprintf(uctl, "ERR auth not required\n");
 		rc = istgt_uctl_writeline(uctl);
 		if (rc != UCTL_CMD_OK) {
@@ -3360,7 +3749,8 @@ istgt_uctl_cmd_execute(UCTL_Ptr uctl)
 		return (UCTL_CMD_ERR);
 	}
 
-	ISTGT_TRACELOG(ISTGT_TRACE_NET, "uctl_cmd: %d:%s executing\n", i, istgt_uctl_cmd_table[i].name);
+	ISTGT_TRACELOG(ISTGT_TRACE_NET, "uctl_cmd: %d:%s executing\n",
+	    i, istgt_uctl_cmd_table[i].name);
 	rc = func(uctl);
 	return (rc);
 }
@@ -3373,13 +3763,15 @@ uctlworker(void *arg)
 	UCTL_Ptr uctl = (UCTL_Ptr) arg;
 	int rc;
 	pthread_t self = pthread_self();
-	snprintf(tinfo, sizeof (tinfo), "u#%d.%ld", uctl->sock, (uint64_t)(((uint64_t *)self)[0]));
+	snprintf(tinfo, sizeof (tinfo), "u#%d.%ld",
+	    uctl->sock, (uint64_t)(((uint64_t *)self)[0]));
 #ifdef HAVE_PTHREAD_SET_NAME_NP
 	pthread_set_name_np(pthread_self(), tinfo);
 #endif
 
 	ISTGT_TRACELOG(ISTGT_TRACE_NET, "connect to %s:%s,%d  (%s->%s)\n",
-	    uctl->portal.host, uctl->portal.port, uctl->portal.tag, uctl->caddr, uctl->saddr);
+	    uctl->portal.host, uctl->portal.port, uctl->portal.tag,
+	    uctl->caddr, uctl->saddr);
 
 	istgt_uctl_snprintf(uctl, "iSCSI Target Controller version %s"
 	    " on %s from %s\n",
@@ -3393,14 +3785,16 @@ uctlworker(void *arg)
 
 	while (1) {
 		if (istgt_get_state(uctl->istgt) != ISTGT_STATE_RUNNING) {
-			ISTGT_TRACELOG(ISTGT_TRACE_DEBUG, "uctl_.. not running..\n");
+			ISTGT_TRACELOG(ISTGT_TRACE_DEBUG,
+			    "uctl_.. not running..\n");
 			break;
 		}
 
 		/* read from socket */
 		rc = istgt_uctl_readline(uctl);
 		if (rc == UCTL_CMD_EOF) {
-			ISTGT_TRACELOG(ISTGT_TRACE_DEBUG, "uctl_readline() EOF\n");
+			ISTGT_TRACELOG(ISTGT_TRACE_DEBUG,
+			    "uctl_readline() EOF\n");
 			break;
 		}
 		if (rc != UCTL_CMD_OK) {
@@ -3414,7 +3808,8 @@ uctlworker(void *arg)
 			break;
 		}
 		if (rc == UCTL_CMD_DISCON) {
-			ISTGT_TRACELOG(ISTGT_TRACE_DEBUG, "request disconnect\n");
+			ISTGT_TRACELOG(ISTGT_TRACE_DEBUG,
+			    "request disconnect\n");
 			break;
 		}
 	}
@@ -3444,7 +3839,8 @@ istgt_free_uctl(UCTL_Ptr uctl)
 }
 
 int
-istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr *sa, socklen_t salen __attribute__((__unused__)))
+istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock,
+    struct sockaddr *sa, socklen_t salen __attribute__((__unused__)))
 {
 	char buf[MAX_TMPBUF];
 	UCTL_Ptr uctl;
@@ -3492,7 +3888,8 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 	case AF_INET6:
 		uctl->family = AF_INET6;
 		rc = istgt_getaddr(sock, uctl->saddr, sizeof (uctl->saddr),
-		    uctl->caddr, sizeof (uctl->caddr), &uctl->iaddr, (uint16_t *)&uctl->iport);
+		    uctl->caddr, sizeof (uctl->caddr), &uctl->iaddr,
+		    (uint16_t *)&uctl->iport);
 		if (rc < 0) {
 			ISTGT_ERRLOG("istgt_getaddr() failed\n");
 			goto error_return;
@@ -3501,7 +3898,8 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 	case AF_INET:
 		uctl->family = AF_INET;
 		rc = istgt_getaddr(sock, uctl->saddr, sizeof (uctl->saddr),
-		    uctl->caddr, sizeof (uctl->caddr), &uctl->iaddr, (uint16_t *)&uctl->iport);
+		    uctl->caddr, sizeof (uctl->caddr), &uctl->iaddr,
+		    (uint16_t *)&uctl->iport);
 		if (rc < 0) {
 			ISTGT_ERRLOG("istgt_getaddr() failed\n");
 			goto error_return;
@@ -3518,7 +3916,8 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 	if (istgt->nuctl_netmasks != 0 && (uctl->family != AF_UNIX)) {
 		rc = -1;
 		for (i = 0; i < istgt->nuctl_netmasks; i++) {
-			rc = istgt_lu_allow_netmask(istgt->uctl_netmasks[i], uctl->caddr);
+			rc = istgt_lu_allow_netmask(istgt->uctl_netmasks[i],
+			    uctl->caddr);
 			if (rc > 0) {
 				/* OK netmask */
 				break;
@@ -3568,7 +3967,8 @@ istgt_create_uctl(ISTGT_Ptr istgt, PORTAL_Ptr portal, int sock, struct sockaddr 
 
 	/* create new thread */
 #ifdef ISTGT_STACKSIZE
-	rc = pthread_create(&uctl->thread, &istgt->attr, &uctlworker, (void *)uctl);
+	rc = pthread_create(&uctl->thread, &istgt->attr, &uctlworker,
+	    (void *)uctl);
 #else
 	rc = pthread_create(&uctl->thread, NULL, &uctlworker, (void *)uctl);
 #endif
@@ -3684,7 +4084,8 @@ istgt_uctl_init(ISTGT_Ptr istgt)
 				return (-1);
 			}
 			if (ag_tag_i == 0) {
-				ISTGT_ERRLOG("invalid auth group %d\n", ag_tag_i);
+				ISTGT_ERRLOG("invalid auth group %d\n",
+				    ag_tag_i);
 				return (-1);
 			}
 		}
