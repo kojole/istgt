@@ -1301,7 +1301,8 @@ istgt_uctl_cmd_unload(UCTL_Ptr uctl)
 	}
 
 	rc = 0;
-/* unload media from lun
+
+#if 0	/* unload media from lun */
 	switch (lu->type) {
 	case ISTGT_LU_TYPE_DVD:
 		MTX_LOCK(&lu->mutex);
@@ -1315,7 +1316,8 @@ istgt_uctl_cmd_unload(UCTL_Ptr uctl)
 		break;
 	default:
 		rc = -1;
-	} */
+	}
+#endif
 
 	if (rc < 0) {
 		istgt_uctl_snprintf(uctl, "ERR unload\n");
@@ -1390,7 +1392,8 @@ istgt_uctl_cmd_load(UCTL_Ptr uctl)
 	}
 
 	rc = -1;
-	/* load media to lun
+
+#if 0	/* load media to lun */
 	switch (lu->type) {
 	case ISTGT_LU_TYPE_DVD:
 		MTX_LOCK(&lu->mutex);
@@ -1404,7 +1407,8 @@ istgt_uctl_cmd_load(UCTL_Ptr uctl)
 		break;
 	default:
 		rc = -1;
-	} */
+	}
+#endif
 
 	if (rc < 0) {
 		istgt_uctl_snprintf(uctl, "ERR load\n");
@@ -1520,7 +1524,8 @@ istgt_uctl_cmd_change(UCTL_Ptr uctl)
 	abspath = xmalloc(len + PATH_MAX);
 	file = realpath(fullpath, abspath);
 #else
-/*
+
+#if 0
 	{
 		long path_max;
 		path_max = pathconf(fullpath, _PC_PATH_MAX);
@@ -1529,7 +1534,8 @@ istgt_uctl_cmd_change(UCTL_Ptr uctl)
 			file = realpath(fullpath, abspath);
 		}
 	}
-*/
+#endif
+
 	file = abspath = realpath(fullpath, NULL);
 #endif /* PATH_MAX */
 	if (file == NULL) {
@@ -1556,7 +1562,8 @@ istgt_uctl_cmd_change(UCTL_Ptr uctl)
 	}
 
 	rc = -1;
-	/* unload and load media from lun
+
+#if 0	/* unload and load media from lun */
 	switch (lu->type) {
 	case ISTGT_LU_TYPE_DVD:
 		MTX_LOCK(&lu->mutex);
@@ -1572,7 +1579,8 @@ istgt_uctl_cmd_change(UCTL_Ptr uctl)
 		break;
 	default:
 		rc = -1;
-	} */
+	}
+#endif
 
 	if (rc < 0) {
 		xfree(safedir);
